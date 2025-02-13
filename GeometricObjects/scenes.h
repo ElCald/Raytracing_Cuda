@@ -18,7 +18,6 @@ class Scenes {
     private:
         vector<Forme> objets;
         Camera camera;
-
 };
 
 #endif

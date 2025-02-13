@@ -13,7 +13,7 @@ class Forme {
         virtual bool intersection(const Point3D p) const = 0;
 
         int materiau;
-    
+        int texture;    
 };
 
 
