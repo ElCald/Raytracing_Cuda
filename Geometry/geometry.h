@@ -4,7 +4,8 @@
 class Point3D {
 
     public:
-        Point3D(double _x=0, double _y=0, double _z=0);
+        Point3D();
+        Point3D(double _x, double _y, double _z);
         virtual ~Point3D() = default;
 
 
@@ -18,7 +19,8 @@ class Point3D {
 class Vecteur3D {
 
     public:
-        Vecteur3D(double _x=0, double _y=0, double _z=0);
+        Vecteur3D();
+        Vecteur3D(double _x, double _y, double _z);
         virtual ~Vecteur3D() = default;
 
         double x;
