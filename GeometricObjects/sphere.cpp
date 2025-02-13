@@ -1,5 +1,7 @@
 #include "formes.h"
 
+#include <cmath>
+
 using namespace std;
 
 
@@ -22,7 +24,7 @@ bool Sphere::intersection(const Ray& ray, double& t) const {
     if (discriminant < 0) {
         return false;  // Pas d'intersection
     } else {
-        double sqrtD = std::sqrt(discriminant);
+        double sqrtD = sqrt(discriminant);
         double t1 = (-b - sqrtD) / (2.0 * a);  // Première solution
         double t2 = (-b + sqrtD) / (2.0 * a);  // Deuxième solution
 
