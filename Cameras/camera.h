@@ -2,23 +2,20 @@
 #define CAMERA_H
 
 #include "../Geometry/geometry.h"
+#include <vector>
 
-class Camera {
-    public:
-        Camera();
-        ~Camera() = default;
+class Camera
+{
+public:
+    Camera(Point3D _position, Vecteur3D _direction, double _fov, int _width, int _height);
 
+    Ray generateRay(int x, int y) const;
 
-        double width;
-        double height;
-        double fov;
-        Point3D pos;
-
-        Vecteur3D forward;  // Direction vers l'avant
-        Vecteur3D right;    // Axe horizontal
-        Vecteur3D up;       // Axe vertical
+    int width, height;
+    double fov;
+    Point3D position;
+    Vecteur3D direction;
+    Vecteur3D right, up;
 };
-
-
 
 #endif
