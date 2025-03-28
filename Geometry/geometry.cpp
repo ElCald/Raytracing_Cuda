@@ -3,10 +3,30 @@
 // ---- Implémentation de Point3D ----
 Point3D::Point3D(double _x, double _y, double _z) : x(_x), y(_y), z(_z) {}
 
+// Point3D Point3D::operator-(const Point3D &p) const
+// {
+//     return Point3D(x - p.x, y - p.y, z - p.z);
+// }
+
+
 Vecteur3D Point3D::operator-(const Point3D &p) const
 {
     return Vecteur3D(x - p.x, y - p.y, z - p.z);
 }
+
+
+
+Point3D Point3D::operator+(const Point3D &p) const
+{
+    return Point3D(x + p.x, y + p.y, z + p.z);
+}
+
+
+Point3D Point3D::operator+(const Vecteur3D& v) const {
+    return Point3D(x + v.x, y + v.y, z + v.z);
+}
+
+
 
 // ---- Implémentation de Vecteur3D ----
 Vecteur3D::Vecteur3D(double _x, double _y, double _z) : x(_x), y(_y), z(_z) {}

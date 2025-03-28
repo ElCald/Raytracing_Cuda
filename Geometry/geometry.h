@@ -21,6 +21,7 @@ public:
     Vecteur3D operator-(const Vecteur3D &v) const;
     Vecteur3D operator*(double scalar) const;
     Vecteur3D operator/(double scalar) const;
+
 };
 
 // Classe représentant un point dans l'espace 3D
@@ -32,6 +33,8 @@ public:
     Point3D(double _x = 0, double _y = 0, double _z = 0);
 
     Vecteur3D operator-(const Point3D &p) const;
+    Point3D operator+(const Point3D &p) const;
+    Point3D operator+(const Vecteur3D &v) const;
 };
 
 // Classe représentant un rayon (Raytracing)

@@ -23,3 +23,12 @@ Ray Camera::generateRay(int x, int y) const
     Vecteur3D ray_direction = (direction + right * px + up * py).normalized();
     return Ray(position, ray_direction);
 }
+
+
+
+
+Light::Light(Point3D _position, Vecteur3D _intensity)
+    : position(_position), intensity(_intensity)
+{
+    
+}

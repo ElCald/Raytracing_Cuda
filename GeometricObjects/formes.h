@@ -3,6 +3,18 @@
 #define FORMES_H
 
 #include "../Geometry/geometry.h"
+#include <vector>
+
+using namespace std;
+
+class Material {
+public:
+    Material(Vecteur3D _ambient, Vecteur3D _diffuse, Vecteur3D _specular, float _shininess) : ambient(_ambient), diffuse(_diffuse), specular(_specular), shininess(_shininess) {}
+    Vecteur3D ambient;
+    Vecteur3D diffuse;
+    Vecteur3D specular;
+    float shininess;
+};
 
 class Color
 {
@@ -21,11 +33,12 @@ public:
 class Forme
 {
 public:
-    Color couleur; // Ajouter une couleur à chaque forme
+    Material materiau; // Ajouter une couleur à chaque forme
 
-    Forme(Color _couleur) : couleur(_couleur) {}
+    Forme(Material _materiau) : materiau(_materiau) {}
 
     virtual bool intersection(const Ray &r, double &t) const = 0;
+    virtual Vecteur3D getNormal(const Point3D& p) const = 0;
 };
 
 class Sphere : public Forme
@@ -34,10 +47,11 @@ public:
     Point3D centre;
     double rayon;
 
-    Sphere(Point3D _centre, double _rayon, Color _couleur)
-        : Forme(_couleur), centre(_centre), rayon(_rayon) {}
+    Sphere(Point3D _centre, double _rayon, Material _materiau)
+        : Forme(_materiau), centre(_centre), rayon(_rayon) {}
 
     bool intersection(const Ray &r, double &t) const override;
+    Vecteur3D getNormal(const Point3D& p) const override;
 };
 
 class Triangle : public Forme
@@ -45,10 +59,11 @@ class Triangle : public Forme
 public:
     Point3D p1, p2, p3;
 
-    Triangle(Point3D _p1, Point3D _p2, Point3D _p3, Color _couleur)
-        : Forme(_couleur), p1(_p1), p2(_p2), p3(_p3) {}
+    Triangle(Point3D _p1, Point3D _p2, Point3D _p3, Material _materiau)
+        : Forme(_materiau), p1(_p1), p2(_p2), p3(_p3) {}
 
     bool intersection(const Ray &r, double &t) const override;
+    Vecteur3D getNormal(const Point3D& p) const override;
 };
 
 class Carre : public Forme
@@ -56,10 +71,40 @@ class Carre : public Forme
 public:
     Point3D p1, p2, p3, p4;
 
-    Carre(Point3D _p1, Point3D _p2, Point3D _p3, Point3D _p4, Color _couleur)
-        : Forme(_couleur), p1(_p1), p2(_p2), p3(_p3), p4(_p4) {}
+    Carre(Point3D _p1, Point3D _p2, Point3D _p3, Point3D _p4, Material _materiau)
+        : Forme(_materiau), p1(_p1), p2(_p2), p3(_p3), p4(_p4) {}
 
     bool intersection(const Ray &r, double &t) const override;
+    Vecteur3D getNormal(const Point3D& p) const override;
 };
+
+
+
+
+class Cube : public Forme
+{
+public:
+    double size; // Taille du cube
+    Point3D center; // Centre du cube
+
+    Cube(double _size, const Point3D &_center, Material _materiau);
+
+    // Générer les 6 faces du cube
+    vector<Carre> generateFaces() const;
+
+    bool intersection(const Ray &r, double &t) const override;
+
+    Vecteur3D getNormal(const Point3D &p) const override;
+
+    void rotateX(double angle);
+    void rotateY(double angle);
+    void rotateZ(double angle);
+
+    std::vector<Point3D> getCorners() const;
+
+
+};
+
+
 
 #endif // FORMES_H
