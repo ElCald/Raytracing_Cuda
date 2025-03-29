@@ -86,7 +86,6 @@ void Scene::render(vector<vector<Color>>& image, int width, int height){
             }
         }
     }
-
 }
 
 
