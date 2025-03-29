@@ -21,7 +21,7 @@ public:
     Vecteur3D operator-(const Vecteur3D &v) const;
     Vecteur3D operator*(double scalar) const;
     Vecteur3D operator/(double scalar) const;
-
+    Vecteur3D operator*(const Vecteur3D &v) const;
 };
 
 // Classe représentant un point dans l'espace 3D
