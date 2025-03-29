@@ -64,6 +64,7 @@ public:
 
     bool intersection(const Ray &r, double &t) const override;
     Vecteur3D getNormal(const Point3D& p) const override;
+    bool contains(const Point3D& p) const;
 };
 
 class Carre : public Forme
@@ -81,29 +82,42 @@ public:
 
 
 
-class Cube : public Forme
-{
+class Cube : public Forme {
+private:
+    double size;   // Taille du cube
+    Point3D center; // Origine > point en bas à gauche de la face avant (0,0,0)
+
 public:
-    double size; // Taille du cube
-    Point3D center; // Centre du cube
+    vector<Triangle*> cube;
 
     Cube(double _size, const Point3D &_center, Material _materiau);
 
-    // Générer les 6 faces du cube
-    vector<Carre> generateFaces() const;
+    void render(vector<Forme*>& obj);
 
-    bool intersection(const Ray &r, double &t) const override;
 
-    Vecteur3D getNormal(const Point3D &p) const override;
-
+    // Rotation autour de l'axe X
     void rotateX(double angle);
+    // Rotation autour de l'axe Y
     void rotateY(double angle);
+    // Rotation autour de l'axe Z
     void rotateZ(double angle);
 
-    std::vector<Point3D> getCorners() const;
 
+    // Translation en X
+    void translateX(double direc);
+    // Translation en Y
+    void translateY(double direc);
+    // Translation en Z
+    void translateZ(double direc);
 
+    bool intersection(const Ray &r, double &t) const override;
+    Vecteur3D getNormal(const Point3D& p) const override;
 };
+
+Point3D rotateAroundX(const Point3D& P, const Point3D& O, double angle);
+Point3D rotateAroundY(const Point3D& P, const Point3D& O, double angle);
+Point3D rotateAroundZ(const Point3D& P, const Point3D& O, double angle);
+
 
 
 

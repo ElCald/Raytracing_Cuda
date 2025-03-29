@@ -106,6 +106,30 @@ Vecteur3D Triangle::getNormal(const Point3D& p) const {
     return AB.cross(AC).normalized();
 }
 
+// Vérifie si un point est à l'intérieur du triangle
+bool Triangle::contains(const Point3D& p) const {
+    // Vecteurs formés par les côtés du triangle
+    Vecteur3D v0 = p2 - p1;
+    Vecteur3D v1 = p3 - p1;
+    Vecteur3D v2 = p - p1;
+
+    // Calcul des produits scalaires
+    double dot00 = v0.dot(v0);
+    double dot01 = v0.dot(v1);
+    double dot02 = v0.dot(v2);
+    double dot11 = v1.dot(v1);
+    double dot12 = v1.dot(v2);
+
+    // Calcul du dénominateur (invariant)
+    double invDenom = 1.0 / (dot00 * dot11 - dot01 * dot01);
+
+    // Calcul des barycentriques
+    double u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    double v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+    // Le point est à l'intérieur si u >= 0, v >= 0, et u + v <= 1
+    return (u >= 0) && (v >= 0) && (u + v <= 1);
+}
 
 
 ///// ---- CARRE ---- /////
@@ -144,165 +168,199 @@ Vecteur3D Carre::getNormal(const Point3D& p) const {
 
 
 ///// ---- CUBE ---- /////
+Cube::Cube(double _size, const Point3D &_center, Material _materiau) : size(_size), center(_center), Forme(_materiau) {
 
+    // face devant
+    Triangle *t1 = new Triangle(Point3D(0, 0, 0), Point3D(_size, 0, 0), Point3D(_size, _size, 0), _materiau);
+    cube.push_back(t1);
 
-Cube::Cube(double _size, const Point3D &_center, Material _materiau)
-    : Forme(_materiau), size(_size), center(_center) {}
+    Triangle *t2 = new Triangle(Point3D(_size, _size, 0), Point3D(0, _size, 0), Point3D(0, 0, 0), _materiau);
+    cube.push_back(t2);
 
+    // face haut
+    Triangle *t3 = new Triangle(Point3D(0, _size, 0), Point3D(_size, _size, 0), Point3D(_size, _size, -_size), _materiau);
+    cube.push_back(t3);
 
+    Triangle *t4 = new Triangle(Point3D(_size, _size, -_size), Point3D(0, _size, -_size), Point3D(0, _size, 0), _materiau);
+    cube.push_back(t4);
 
-vector<Carre> Cube::generateFaces() const {
-    vector<Carre> faces;
+    // //face droite
+    Triangle *t5 = new Triangle(Point3D(_size, 0, 0), Point3D(_size, 0, -_size), Point3D(_size, _size, -_size), _materiau);
+    cube.push_back(t5);
 
-    // Les 6 faces du cube (en utilisant les points)
-    // Face avant
-    faces.push_back(Carre(
-        Point3D(center.x - size / 2, center.y - size / 2, center.z + size / 2),
-        Point3D(center.x + size / 2, center.y - size / 2, center.z + size / 2),
-        Point3D(center.x + size / 2, center.y + size / 2, center.z + size / 2),
-        Point3D(center.x - size / 2, center.y + size / 2, center.z + size / 2),
-        materiau
-    ));
-    // Face arrière
-    faces.push_back(Carre(
-        Point3D(center.x - size / 2, center.y - size / 2, center.z - size / 2),
-        Point3D(center.x + size / 2, center.y - size / 2, center.z - size / 2),
-        Point3D(center.x + size / 2, center.y + size / 2, center.z - size / 2),
-        Point3D(center.x - size / 2, center.y + size / 2, center.z - size / 2),
-        materiau
-    ));
-    // Face gauche
-    faces.push_back(Carre(
-        Point3D(center.x - size / 2, center.y - size / 2, center.z - size / 2),
-        Point3D(center.x - size / 2, center.y - size / 2, center.z + size / 2),
-        Point3D(center.x - size / 2, center.y + size / 2, center.z + size / 2),
-        Point3D(center.x - size / 2, center.y + size / 2, center.z - size / 2),
-        materiau
-    ));
-    // Face droite
-    faces.push_back(Carre(
-        Point3D(center.x + size / 2, center.y - size / 2, center.z - size / 2),
-        Point3D(center.x + size / 2, center.y - size / 2, center.z + size / 2),
-        Point3D(center.x + size / 2, center.y + size / 2, center.z + size / 2),
-        Point3D(center.x + size / 2, center.y + size / 2, center.z - size / 2),
-        materiau
-    ));
-    // Face supérieure
-    faces.push_back(Carre(
-        Point3D(center.x - size / 2, center.y + size / 2, center.z - size / 2),
-        Point3D(center.x + size / 2, center.y + size / 2, center.z - size / 2),
-        Point3D(center.x + size / 2, center.y + size / 2, center.z + size / 2),
-        Point3D(center.x - size / 2, center.y + size / 2, center.z + size / 2),
-        materiau
-    ));
-    // Face inférieure
-    faces.push_back(Carre(
-        Point3D(center.x - size / 2, center.y - size / 2, center.z - size / 2),
-        Point3D(center.x + size / 2, center.y - size / 2, center.z - size / 2),
-        Point3D(center.x + size / 2, center.y - size / 2, center.z + size / 2),
-        Point3D(center.x - size / 2, center.y - size / 2, center.z + size / 2),
-        materiau
-    ));
+    Triangle *t6 = new Triangle(Point3D(_size, _size, -_size), Point3D(_size, _size, 0), Point3D(_size, 0, 0), _materiau);
+    cube.push_back(t6);
 
-    return faces;
+    // face gauche
+    Triangle *t7 = new Triangle(Point3D(0, 0, -_size), Point3D(0, 0, 0), Point3D(0, _size, 0), _materiau);
+    cube.push_back(t7);
+
+    Triangle *t8 = new Triangle(Point3D(0, _size, 0), Point3D(0, _size, -_size), Point3D(0, 0, -_size), _materiau);
+    cube.push_back(t8);
+
+    // face bas
+    Triangle *t9 = new Triangle(Point3D(0, 0, -_size), Point3D(_size, 0, -_size), Point3D(_size, 0, 0), _materiau);
+    cube.push_back(t9);
+
+    Triangle *t10 = new Triangle(Point3D(_size, 0, 0), Point3D(0, 0, 0), Point3D(0, 0, -_size), _materiau);
+    cube.push_back(t10);
+
+    // face arriere
+    Triangle *t11 = new Triangle(Point3D(0, _size, -_size), Point3D(_size, _size, -_size), Point3D(_size, 0, -_size), _materiau);
+    cube.push_back(t11);
+
+    Triangle *t12 = new Triangle(Point3D(_size, 0, -_size), Point3D(0, 0, -_size), Point3D(0, _size, -_size), _materiau);
+    cube.push_back(t12);
+
+    int x_temp=center.x, y_temp=center.y, z_temp=center.z;
+
+    translateX(center.x);
+    translateY(center.y);
+    translateZ(center.z);
+
+    center.x = x_temp;
+    center.y = y_temp;
+    center.z = z_temp;
 }
 
 
 
+void Cube::translateX(double direc){
+    for(auto t : cube){
+        t->p1.x += direc;
+        t->p2.x += direc;
+        t->p3.x += direc;
+    }
+
+    center.x += direc;
+}
+
+
+void Cube::translateY(double direc){
+    for(auto t : cube){
+        t->p1.y += direc;
+        t->p2.y += direc;
+        t->p3.y += direc;
+    }
+
+    center.y += direc;
+}
+
+
+void Cube::translateZ(double direc){
+    for(auto t : cube){
+        t->p1.z += direc;
+        t->p2.z += direc;
+        t->p3.z += direc;
+    }
+
+    center.z += direc;
+}
+
+
+void Cube::rotateX(double angle){
+    for(auto t : cube){
+        t->p1 = rotateAroundX(t->p1, center,  angle);
+        t->p2 = rotateAroundX(t->p2, center,  angle);
+        t->p3 = rotateAroundX(t->p3, center,  angle);
+    }
+}
+
+
+void Cube::rotateY(double angle){
+    for(auto t : cube){
+        t->p1 = rotateAroundY(t->p1, center,  angle);
+        t->p2 = rotateAroundY(t->p2, center,  angle);
+        t->p3 = rotateAroundY(t->p3, center,  angle);
+    }
+}
+
+
+void Cube::rotateZ(double angle){
+    for(auto t : cube){
+        t->p1 = rotateAroundZ(t->p1, center,  angle);
+        t->p2 = rotateAroundZ(t->p2, center,  angle);
+        t->p3 = rotateAroundZ(t->p3, center,  angle);
+    }
+}
+
+
+
+void Cube::render(vector<Forme*>& obj){
+    for(auto t : cube){
+        obj.push_back(t);
+    }
+}
+
+
+// implémentation par défaut
 bool Cube::intersection(const Ray &r, double &t) const {
-    // Teste l'intersection avec les 6 faces du cube
-    std::vector<Carre> faces = generateFaces();
-    double minT = std::numeric_limits<double>::infinity();
-    bool hit = false;
-
-    for (const Carre &face : faces) {
-        double t_face;
-        if (face.intersection(r, t_face) && t_face < minT) {
-            minT = t_face;
-            hit = true;
-        }
-    }
-
-    if (hit) {
-        t = minT;
-        return true;
-    }
-
     return false;
 }
-
-
-Vecteur3D Cube::getNormal(const Point3D &p) const {
-    // Calcul de la normale d'une face du cube
-    // Il suffit de tester sur quelle face l'intersection a eu lieu
-    std::vector<Carre> faces = generateFaces();
-    double t;
-    for (const Carre &face : faces) {
-        if (face.intersection(Ray(p, Vecteur3D(0, 0, 0)), t)) { // Test intersection avec la face
-            return face.getNormal(p);
-        }
-    }
-    return Vecteur3D(0, 0, 0); // Valeur par défaut, ne devrait pas arriver
+Vecteur3D Cube::getNormal(const Point3D& p) const {
+    return Vecteur3D();
 }
 
 
 
-// Appliquer une rotation autour de l'axe X
-void Cube::rotateX(double angle) {
-    double rad = angle * M_PI / 180.0;  // Convertir l'angle en radians
-    std::vector<Point3D> corners = getCorners();  // Obtenir les coins du cube
 
-    for (Point3D &p : corners) {
-        double y = p.y;
-        double z = p.z;
-        p.y = y * std::cos(rad) - z * std::sin(rad);
-        p.z = y * std::sin(rad) + z * std::cos(rad);
-    }
-}
 
-// Appliquer une rotation autour de l'axe Y
-void Cube::rotateY(double angle) {
-    double rad = angle * M_PI / 180.0;  // Convertir en radians
-    std::vector<Point3D> corners = getCorners();  // Obtenir les coins du cube
+///// ---- AUTRE ---- /////
 
-    // Rotation autour de l'axe Y
-    for (Point3D &p : corners) {
-        double x = p.x;
-        double z = p.z;
-        p.x = x * std::cos(rad) + z * std::sin(rad);
-        p.z = -x * std::sin(rad) + z * std::cos(rad);
-    }
-}
+Point3D rotateAroundX(const Point3D& P, const Point3D& O, double angle) {
+    // Convertir l'angle en radians
+    double rad = angle * M_PI / 180.0;
+    double cosAngle = cos(rad);
+    double sinAngle = sin(rad);
 
-// Appliquer une rotation autour de l'axe Z
-void Cube::rotateZ(double angle) {
-    double rad = angle * M_PI / 180.0;  // Convertir en radians
-    std::vector<Point3D> corners = getCorners();  // Obtenir les coins du cube
+    // Traduire le point P pour que O soit à l'origine
+    double dx = P.x - O.x;
+    double dy = P.y - O.y;
+    double dz = P.z - O.z;
 
-    // Rotation autour de l'axe Z
-    for (Point3D &p : corners) {
-        double x = p.x;
-        double y = p.y;
-        p.x = x * std::cos(rad) - y * std::sin(rad);
-        p.y = x * std::sin(rad) + y * std::cos(rad);
-    }
+    // Appliquer la matrice de rotation autour de l'axe X
+    double newY = cosAngle * dy - sinAngle * dz;
+    double newZ = sinAngle * dy + cosAngle * dz;
+
+    // Revenir à la position d'origine
+    return Point3D(P.x, newY + O.y, newZ + O.z);
 }
 
 
-// Fonction pour obtenir les coins du cube
-std::vector<Point3D> Cube::getCorners() const {
-    std::vector<Point3D> corners;
-    double halfSize = size / 2.0;
-    
-    // Crée les 8 coins du cube (cube centré autour de center)
-    corners.push_back(Point3D(center.x - halfSize, center.y - halfSize, center.z - halfSize));
-    corners.push_back(Point3D(center.x + halfSize, center.y - halfSize, center.z - halfSize));
-    corners.push_back(Point3D(center.x + halfSize, center.y + halfSize, center.z - halfSize));
-    corners.push_back(Point3D(center.x - halfSize, center.y + halfSize, center.z - halfSize));
-    corners.push_back(Point3D(center.x - halfSize, center.y - halfSize, center.z + halfSize));
-    corners.push_back(Point3D(center.x + halfSize, center.y - halfSize, center.z + halfSize));
-    corners.push_back(Point3D(center.x + halfSize, center.y + halfSize, center.z + halfSize));
-    corners.push_back(Point3D(center.x - halfSize, center.y + halfSize, center.z + halfSize));
+Point3D rotateAroundY(const Point3D& P, const Point3D& O, double angle) {
+    // Convertir l'angle en radians
+    double rad = angle * M_PI / 180.0;
+    double cosAngle = cos(rad);
+    double sinAngle = sin(rad);
 
-    return corners;
+    // Traduire le point P pour que O soit à l'origine
+    double dx = P.x - O.x;
+    double dy = P.y - O.y;
+    double dz = P.z - O.z;
+
+    // Appliquer la matrice de rotation autour de l'axe Y
+    double newX = cosAngle * dx + sinAngle * dz;
+    double newZ = -sinAngle * dx + cosAngle * dz;
+
+    // Revenir à la position d'origine
+    return Point3D(newX + O.x, P.y, newZ + O.z);
+}
+
+
+Point3D rotateAroundZ(const Point3D& P, const Point3D& O, double angle) {
+    // Convertir l'angle en radians
+    double rad = angle * M_PI / 180.0;
+    double cosAngle = cos(rad);
+    double sinAngle = sin(rad);
+
+    // Traduire le point P pour que O soit à l'origine
+    double dx = P.x - O.x;
+    double dy = P.y - O.y;
+
+    // Appliquer la matrice de rotation autour de l'axe Z
+    double newX = cosAngle * dx - sinAngle * dy;
+    double newY = sinAngle * dx + cosAngle * dy;
+
+    // Revenir à la position d'origine
+    return Point3D(newX + O.x, newY + O.y, P.z);
 }
