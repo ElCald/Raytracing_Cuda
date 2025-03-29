@@ -11,7 +11,7 @@ class Material {
 public:
     Material(Vecteur3D _ambient, Vecteur3D _diffuse, Vecteur3D _specular, float _shininess) : ambient(_ambient), diffuse(_diffuse), specular(_specular), shininess(_shininess) {}
     Vecteur3D ambient;
-    Vecteur3D diffuse;
+    Vecteur3D diffuse; // couleur
     Vecteur3D specular;
     float shininess;
 };
@@ -47,8 +47,7 @@ public:
     Point3D centre;
     double rayon;
 
-    Sphere(Point3D _centre, double _rayon, Material _materiau)
-        : Forme(_materiau), centre(_centre), rayon(_rayon) {}
+    Sphere(Point3D _centre, double _rayon, Material _materiau);
 
     bool intersection(const Ray &r, double &t) const override;
     Vecteur3D getNormal(const Point3D& p) const override;
@@ -59,21 +58,20 @@ class Triangle : public Forme
 public:
     Point3D p1, p2, p3;
 
-    Triangle(Point3D _p1, Point3D _p2, Point3D _p3, Material _materiau)
-        : Forme(_materiau), p1(_p1), p2(_p2), p3(_p3) {}
+    Triangle(Point3D _p1, Point3D _p2, Point3D _p3, Material _materiau);
 
     bool intersection(const Ray &r, double &t) const override;
     Vecteur3D getNormal(const Point3D& p) const override;
     bool contains(const Point3D& p) const;
 };
 
+
 class Carre : public Forme
 {
 public:
     Point3D p1, p2, p3, p4;
 
-    Carre(Point3D _p1, Point3D _p2, Point3D _p3, Point3D _p4, Material _materiau)
-        : Forme(_materiau), p1(_p1), p2(_p2), p3(_p3), p4(_p4) {}
+    Carre(Point3D _p1, Point3D _p2, Point3D _p3, Point3D _p4, Material _materiau);
 
     bool intersection(const Ray &r, double &t) const override;
     Vecteur3D getNormal(const Point3D& p) const override;
@@ -92,8 +90,6 @@ public:
 
     Cube(double _size, const Point3D &_center, Material _materiau);
 
-    void render(vector<Forme*>& obj);
-
 
     // Rotation autour de l'axe X
     void rotateX(double angle);
@@ -101,7 +97,6 @@ public:
     void rotateY(double angle);
     // Rotation autour de l'axe Z
     void rotateZ(double angle);
-
 
     // Translation en X
     void translateX(double direc);

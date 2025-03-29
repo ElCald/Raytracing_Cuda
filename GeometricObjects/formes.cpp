@@ -7,6 +7,8 @@ using namespace std;
 ///// ---- SPHERE ---- /////
 
 
+Sphere::Sphere(Point3D _centre, double _rayon, Material _materiau): Forme(_materiau), centre(_centre), rayon(_rayon) {}
+
 
 // Intersection d'un rayon avec une sphère
 bool Sphere::intersection(const Ray &r, double &t) const
@@ -58,6 +60,8 @@ Vecteur3D Sphere::getNormal(const Point3D& p) const {
 
 
 ///// ---- TRIANGLE ---- /////
+
+Triangle::Triangle(Point3D _p1, Point3D _p2, Point3D _p3, Material _materiau) : Forme(_materiau), p1(_p1), p2(_p2), p3(_p3) {}
 
 
 // Intersection d'un rayon avec un triangle
@@ -284,13 +288,6 @@ void Cube::rotateZ(double angle){
     }
 }
 
-
-
-void Cube::render(vector<Forme*>& obj){
-    for(auto t : cube){
-        obj.push_back(t);
-    }
-}
 
 
 // implémentation par défaut
