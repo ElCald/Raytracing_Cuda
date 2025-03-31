@@ -5,8 +5,9 @@ set(SOURCE_FILES
     main.cpp
     ${CMAKE_SOURCE_DIR}/Geometry/geometry.cpp
     ${CMAKE_SOURCE_DIR}/GeometricObjects/formes.cpp
-    ${CMAKE_SOURCE_DIR}/Cameras/camera.cpp
+    ${CMAKE_SOURCE_DIR}/Utils/camera.cpp
     ${CMAKE_SOURCE_DIR}/Utils/scene.cpp
+    ${CMAKE_SOURCE_DIR}/Utils/light.cpp
 )
 
 # Ajouter l'exécutable
@@ -16,6 +17,5 @@ add_executable(main ${SOURCE_FILES})
 include_directories(
     ${CMAKE_SOURCE_DIR}/Geometry
     ${CMAKE_SOURCE_DIR}/GeometricObjects
-    ${CMAKE_SOURCE_DIR}/Cameras
     ${CMAKE_SOURCE_DIR}/Utils
 )

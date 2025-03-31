@@ -1,28 +1,37 @@
 #include "scene.h"
 
-Scene::Scene(Camera& _camera, Light& _light) : camera(_camera), light(_light){}
+Scene::Scene(Camera &_camera) : camera(_camera) {}
 
-
-Scene::~Scene() {
-    for(auto obj : objects){
+Scene::~Scene()
+{
+    for (auto obj : objects)
+    {
         delete obj;
+    }
+
+    for (auto light : lights)
+    {
+        delete light;
     }
 }
 
-
-void Scene::addObject(vector<Triangle*>& obj)
+void Scene::addObject(vector<Triangle *> &obj)
 {
-    for(auto o : obj){
+    for (auto o : obj)
+    {
         objects.push_back(o);
     }
 }
 
-
-void Scene::addObject(Forme* obj)
+void Scene::addObject(Forme *obj)
 {
     objects.push_back(obj);
 }
 
+void Scene::addLight(Light *light)
+{
+    lights.push_back(light);
+}
 
 // bool Scene::intersect(const Ray &ray, Point3D &hitPoint, Vecteur3D &normal, int &materiau) const
 // {
@@ -39,8 +48,8 @@ void Scene::addObject(Forme* obj)
 //     return hit;
 // }
 
-
-void Scene::render(vector<vector<Color>>& image, int width, int height){
+void Scene::render(vector<vector<Color>> &image, int width, int height)
+{
 
     for (int y = 0; y < height; y++)
     {
@@ -71,7 +80,7 @@ void Scene::render(vector<vector<Color>>& image, int width, int height){
                 Vecteur3D viewDir = (camera.position - hitPoint).normalized();
 
                 // Calcul de la couleur avec le modèle de Phong
-                Vecteur3D phongColor = phongShading(hitPoint, normal, viewDir, light, closestObj->materiau);
+                Vecteur3D phongColor = phongShading(hitPoint, normal, viewDir, lights, closestObj->materiau);
 
                 // Applique la couleur calculée sur l'image
                 image[y][x] = Color(
@@ -79,46 +88,44 @@ void Scene::render(vector<vector<Color>>& image, int width, int height){
                     std::min(255.0, phongColor.y * 255),
                     std::min(255.0, phongColor.z * 255));
             }
-            else
-            {
-                // Si aucune intersection, fond noir
-                image[y][x] = Color(0, 0, 0);
-            }
         }
     }
 }
 
-
-
 // Fonction pour calculer la couleur avec Phong
-Vecteur3D phongShading(const Point3D &point, const Vecteur3D &normal, const Vecteur3D &viewDir, const Light &light, const Material &material)
+Vecteur3D phongShading(const Point3D &point, const Vecteur3D &normal, const Vecteur3D &viewDir, std::vector<Light *> lights, const Material &material)
 {
-    // Direction de la lumière (vecteur entre le point et la source lumineuse)
-    Vecteur3D lightDir = light.position - point;  // Soustraction entre Point3D et Point3D donne un Vecteur3D
-    lightDir = lightDir.normalized(); // Normaliser pour obtenir un vecteur unitaire
+    Vecteur3D ambient, diffuse, specular;
 
-    // Calcul du vecteur de réflexion
-    Vecteur3D reflectDir = (normal * (2.0 * normal.dot(lightDir))) - lightDir;
+    for (auto light : lights)
+    {
+        // Direction de la lumière (vecteur entre le point et la source lumineuse)
+        Vecteur3D lightDir = light->position - point; // Soustraction entre Point3D et Point3D donne un Vecteur3D
+        lightDir = lightDir.normalized();             // Normaliser pour obtenir un vecteur unitaire
 
-    // Calcul de la distance entre le point d'impact et la source de lumière
-    double distance = std::sqrt(lightDir.x * lightDir.x + lightDir.y * lightDir.y + lightDir.z * lightDir.z); // Utilisation de norm() pour calculer la distance
+        // Calcul du vecteur de réflexion
+        Vecteur3D reflectDir = (normal * (2.0 * normal.dot(lightDir))) - lightDir;
 
-    // Atténuation de la lumière en fonction de la distance (atténuation quadratique)
-    double attenuation = 1.0 / (distance * distance); // Atténuation quadratique
+        // Calcul de la distance entre le point d'impact et la source de lumière
+        double distance = std::sqrt(lightDir.x * lightDir.x + lightDir.y * lightDir.y + lightDir.z * lightDir.z); // Utilisation de norm() pour calculer la distance
 
-    // Appliquer l'atténuation à l'intensité de la lumière
-    Vecteur3D lightIntensity = light.intensity * attenuation;
+        // Atténuation de la lumière en fonction de la distance (atténuation quadratique)
+        double attenuation = 1.0 / (distance * distance); // Atténuation quadratique
 
-    // Composante ambiante
-    Vecteur3D ambient = material.ambient * lightIntensity;
+        // Appliquer l'atténuation à l'intensité de la lumière
+        Vecteur3D lightIntensity = light->intensity * attenuation;
 
-    // Composante diffuse (Lambert)
-    double diff = std::max(normal.dot(lightDir), 0.0);
-    Vecteur3D diffuse = material.diffuse * (lightIntensity * diff);
+        // Composante ambiante
+        ambient = ambient + (material.ambient * lightIntensity);
 
-    // Composante spéculaire (Phong)
-    double spec = std::pow(std::max(viewDir.dot(reflectDir), 0.0), material.shininess);
-    Vecteur3D specular = material.specular * (lightIntensity * spec);
+        // Composante diffuse (Lambert)
+        double diff = std::max(normal.dot(lightDir), 0.0);
+        diffuse = diffuse + (material.diffuse * (lightIntensity * diff));
+
+        // Composante spéculaire (Phong)
+        double spec = std::pow(std::max(viewDir.dot(reflectDir), 0.0), material.shininess);
+        specular = specular + (material.specular * (lightIntensity * spec));
+    }
 
     return ambient + diffuse + specular;
 }

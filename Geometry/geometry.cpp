@@ -76,8 +76,8 @@ Vecteur3D Vecteur3D::operator*(const Vecteur3D &v) const
     return Vecteur3D(x * v.x, y * v.y, z * v.z);
 }
 
-
-Vecteur3D Vecteur3D::inverse() const {
+Vecteur3D Vecteur3D::inverse() const
+{
     return Vecteur3D(-x, -y, -z);
 }
 
