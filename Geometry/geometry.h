@@ -1,9 +1,10 @@
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
 
+// Includes
 #include <cmath>
 
-// Classe représentant un vecteur 3D
+// 3D Vector class
 class Vecteur3D
 {
 public:
@@ -11,12 +12,11 @@ public:
 
     Vecteur3D(double _x = 0, double _y = 0, double _z = 0);
 
-    double dot(const Vecteur3D &v) const;      // Produit scalaire
-    Vecteur3D cross(const Vecteur3D &v) const; // Produit vectoriel
-    double length() const;                     // Norme du vecteur
-    Vecteur3D normalized() const;              // Vecteur unitaire
+    double dot(const Vecteur3D &v) const;
+    double length() const;
+    Vecteur3D cross(const Vecteur3D &v) const;
+    Vecteur3D normalized() const;
 
-    // Opérateurs pour les calculs vectoriels
     Vecteur3D operator+(const Vecteur3D &v) const;
     Vecteur3D operator-(const Vecteur3D &v) const;
     Vecteur3D operator*(double scalar) const;
@@ -25,7 +25,7 @@ public:
     Vecteur3D inverse() const;
 };
 
-// Classe représentant un point dans l'espace 3D
+// 3D Point class
 class Point3D
 {
 public:
@@ -38,7 +38,7 @@ public:
     Point3D operator+(const Vecteur3D &v) const;
 };
 
-// Classe représentant un rayon (Raytracing)
+// Ray class
 class Ray
 {
 public:
@@ -46,7 +46,7 @@ public:
     Vecteur3D direction;
 
     Ray(const Point3D &orig, const Vecteur3D &direc);
-    Point3D at(double t) const; // Renvoie un point sur le rayon à une distance t
+    Point3D at(double t) const;
 };
 
 #endif // GEOMETRY_H

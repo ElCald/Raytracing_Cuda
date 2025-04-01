@@ -1,16 +1,57 @@
+// Includes
 #include "formes.h"
 #include <cmath>
 
 using namespace std;
 
+// ---- Material Implementation ----
 
-///// ---- SPHERE ---- /////
+/**
+ * @param _ambient ambient light
+ * @param _diffuse diffuse light
+ * @param _specular specular light
+ * @param _shininess shining of the light
+ */
+Material::Material(Vecteur3D _ambient, Vecteur3D _diffuse, Vecteur3D _specular, float _shininess) : ambient(_ambient), diffuse(_diffuse), specular(_specular), shininess(_shininess) {}
 
+// ---- Color Implementation ----
 
-Sphere::Sphere(Point3D _centre, double _rayon, Material _materiau): Forme(_materiau), centre(_centre), rayon(_rayon) {}
+/**
+ * @param r red
+ * @param  g green
+ * @param b blue
+ */
+Color::Color(int r = 0, int g = 0, int b = 0) : r(r), g(g), b(b) {}
 
+/**
+ * @return to int of RGB for ppm image
+ */
+int Color::toInt() const
+{
+    return (r << 16) | (g << 8) | b;
+}
 
-// Intersection d'un rayon avec une sphère
+// ---- Form Implementation ----
+
+/**
+ * @param _materiau material
+ */
+Forme::Forme(Material _materiau) : materiau(_materiau) {}
+
+// ---- Sphere Implementation ----
+
+/**
+ * @param _centre center of the sphere
+ * @param _rayon sphere's radius
+ * @param _materiau sphere's material
+ */
+Sphere::Sphere(Point3D _centre, double _rayon, Material _materiau) : Forme(_materiau), centre(_centre), rayon(_rayon) {}
+
+/**
+ * @param r ray
+ * @param t point on the ray
+ * @return true if there is intersection between ray and sphere
+ */
 bool Sphere::intersection(const Ray &r, double &t) const
 {
     // Le rayon est donné par : r(t) = origine + t * direction
@@ -51,18 +92,14 @@ bool Sphere::intersection(const Ray &r, double &t) const
     return false;
 }
 
-
-Vecteur3D Sphere::getNormal(const Point3D& p) const {
+Vecteur3D Sphere::getNormal(const Point3D &p) const
+{
     return (p - this->centre).normalized();
 }
-
-
-
 
 ///// ---- TRIANGLE ---- /////
 
 Triangle::Triangle(Point3D _p1, Point3D _p2, Point3D _p3, Material _materiau) : Forme(_materiau), p1(_p1), p2(_p2), p3(_p3) {}
-
 
 // Intersection d'un rayon avec un triangle
 bool Triangle::intersection(const Ray &r, double &t) const
@@ -101,8 +138,8 @@ bool Triangle::intersection(const Ray &r, double &t) const
         return false;
 }
 
-
-Vecteur3D Triangle::getNormal(const Point3D& p) const {
+Vecteur3D Triangle::getNormal(const Point3D &p) const
+{
     // Les vecteurs AB et AC
     Vecteur3D AB = p2 - p1;
     Vecteur3D AC = p3 - p1;
@@ -111,7 +148,8 @@ Vecteur3D Triangle::getNormal(const Point3D& p) const {
 }
 
 // Vérifie si un point est à l'intérieur du triangle
-bool Triangle::contains(const Point3D& p) const {
+bool Triangle::contains(const Point3D &p) const
+{
     // Vecteurs formés par les côtés du triangle
     Vecteur3D v0 = p2 - p1;
     Vecteur3D v1 = p3 - p1;
@@ -135,9 +173,7 @@ bool Triangle::contains(const Point3D& p) const {
     return (u >= 0) && (v >= 0) && (u + v <= 1);
 }
 
-
 ///// ---- CARRE ---- /////
-
 
 // Intersection d'un rayon avec un carré (simplifié comme 4 bords)
 bool Carre::intersection(const Ray &r, double &t) const
@@ -160,8 +196,8 @@ bool Carre::intersection(const Ray &r, double &t) const
     return false;
 }
 
-
-Vecteur3D Carre::getNormal(const Point3D& p) const {
+Vecteur3D Carre::getNormal(const Point3D &p) const
+{
     // On prend les trois premiers points pour définir le plan
     Vecteur3D AB = p2 - p1;
     Vecteur3D AD = p4 - p1;
@@ -169,10 +205,9 @@ Vecteur3D Carre::getNormal(const Point3D& p) const {
     return AB.cross(AD).normalized();
 }
 
-
-
 ///// ---- CUBE ---- /////
-Cube::Cube(double _size, const Point3D &_center, Material _materiau) : size(_size), center(_center), Forme(_materiau) {
+Cube::Cube(double _size, const Point3D &_center, Material _materiau) : size(_size), center(_center), Forme(_materiau)
+{
 
     // face devant
     Triangle *t1 = new Triangle(Point3D(0, 0, 0), Point3D(_size, 0, 0), Point3D(_size, _size, 0), _materiau);
@@ -216,7 +251,7 @@ Cube::Cube(double _size, const Point3D &_center, Material _materiau) : size(_siz
     Triangle *t12 = new Triangle(Point3D(_size, 0, -_size), Point3D(0, 0, -_size), Point3D(0, _size, -_size), _materiau);
     cube.push_back(t12);
 
-    int x_temp=center.x, y_temp=center.y, z_temp=center.z;
+    int x_temp = center.x, y_temp = center.y, z_temp = center.z;
 
     translateX(center.x);
     translateY(center.y);
@@ -227,10 +262,10 @@ Cube::Cube(double _size, const Point3D &_center, Material _materiau) : size(_siz
     center.z = z_temp;
 }
 
-
-
-void Cube::translateX(double direc){
-    for(auto t : cube){
+void Cube::translateX(double direc)
+{
+    for (auto t : cube)
+    {
         t->p1.x += direc;
         t->p2.x += direc;
         t->p3.x += direc;
@@ -239,9 +274,10 @@ void Cube::translateX(double direc){
     center.x += direc;
 }
 
-
-void Cube::translateY(double direc){
-    for(auto t : cube){
+void Cube::translateY(double direc)
+{
+    for (auto t : cube)
+    {
         t->p1.y += direc;
         t->p2.y += direc;
         t->p3.y += direc;
@@ -250,9 +286,10 @@ void Cube::translateY(double direc){
     center.y += direc;
 }
 
-
-void Cube::translateZ(double direc){
-    for(auto t : cube){
+void Cube::translateZ(double direc)
+{
+    for (auto t : cube)
+    {
         t->p1.z += direc;
         t->p2.z += direc;
         t->p3.z += direc;
@@ -261,50 +298,50 @@ void Cube::translateZ(double direc){
     center.z += direc;
 }
 
-
-void Cube::rotateX(double angle){
-    for(auto t : cube){
-        t->p1 = rotateAroundX(t->p1, center,  angle);
-        t->p2 = rotateAroundX(t->p2, center,  angle);
-        t->p3 = rotateAroundX(t->p3, center,  angle);
+void Cube::rotateX(double angle)
+{
+    for (auto t : cube)
+    {
+        t->p1 = rotateAroundX(t->p1, center, angle);
+        t->p2 = rotateAroundX(t->p2, center, angle);
+        t->p3 = rotateAroundX(t->p3, center, angle);
     }
 }
 
-
-void Cube::rotateY(double angle){
-    for(auto t : cube){
-        t->p1 = rotateAroundY(t->p1, center,  angle);
-        t->p2 = rotateAroundY(t->p2, center,  angle);
-        t->p3 = rotateAroundY(t->p3, center,  angle);
+void Cube::rotateY(double angle)
+{
+    for (auto t : cube)
+    {
+        t->p1 = rotateAroundY(t->p1, center, angle);
+        t->p2 = rotateAroundY(t->p2, center, angle);
+        t->p3 = rotateAroundY(t->p3, center, angle);
     }
 }
 
-
-void Cube::rotateZ(double angle){
-    for(auto t : cube){
-        t->p1 = rotateAroundZ(t->p1, center,  angle);
-        t->p2 = rotateAroundZ(t->p2, center,  angle);
-        t->p3 = rotateAroundZ(t->p3, center,  angle);
+void Cube::rotateZ(double angle)
+{
+    for (auto t : cube)
+    {
+        t->p1 = rotateAroundZ(t->p1, center, angle);
+        t->p2 = rotateAroundZ(t->p2, center, angle);
+        t->p3 = rotateAroundZ(t->p3, center, angle);
     }
 }
-
-
 
 // implémentation par défaut
-bool Cube::intersection(const Ray &r, double &t) const {
+bool Cube::intersection(const Ray &r, double &t) const
+{
     return false;
 }
-Vecteur3D Cube::getNormal(const Point3D& p) const {
+Vecteur3D Cube::getNormal(const Point3D &p) const
+{
     return Vecteur3D();
 }
 
-
-
-
-
 ///// ---- AUTRE ---- /////
 
-Point3D rotateAroundX(const Point3D& P, const Point3D& O, double angle) {
+Point3D rotateAroundX(const Point3D &P, const Point3D &O, double angle)
+{
     // Convertir l'angle en radians
     double rad = angle * M_PI / 180.0;
     double cosAngle = cos(rad);
@@ -323,8 +360,8 @@ Point3D rotateAroundX(const Point3D& P, const Point3D& O, double angle) {
     return Point3D(P.x, newY + O.y, newZ + O.z);
 }
 
-
-Point3D rotateAroundY(const Point3D& P, const Point3D& O, double angle) {
+Point3D rotateAroundY(const Point3D &P, const Point3D &O, double angle)
+{
     // Convertir l'angle en radians
     double rad = angle * M_PI / 180.0;
     double cosAngle = cos(rad);
@@ -343,8 +380,8 @@ Point3D rotateAroundY(const Point3D& P, const Point3D& O, double angle) {
     return Point3D(newX + O.x, P.y, newZ + O.z);
 }
 
-
-Point3D rotateAroundZ(const Point3D& P, const Point3D& O, double angle) {
+Point3D rotateAroundZ(const Point3D &P, const Point3D &O, double angle)
+{
     // Convertir l'angle en radians
     double rad = angle * M_PI / 180.0;
     double cosAngle = cos(rad);

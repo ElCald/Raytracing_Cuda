@@ -44,8 +44,6 @@ int main()
     // Lights definition
     Light *light = new Light(Point3D(-1.5, 0, -5), Vecteur3D(0, 1, 0)); // White light
     scene.addLight(light);                                              // Adding the light to lights list
-    /*Light *light2 = new Light(Point3D(2, 0, -5), Vecteur3D(0, 0, 1)); // White light
-    scene.addLight(light2);*/
 
     // Materials definition
     Material materialRed(Vecteur3D(0.1, 0.1, 0.1), Vecteur3D(1, 0, 0), Vecteur3D(1, 1, 1), 32);
@@ -61,7 +59,7 @@ int main()
     Sphere *sphere = new Sphere(Point3D(0, 0, -8), 3, materialWhite);
     scene.addObject(sphere); // Adding the sphere to the list of objects
 
-    // Cube definition
+    // Cubes definition
     /*Cube *cube = new Cube(3.0, Point3D(1.5, -3, 0), materialPurple);
     scene.addObject(cube->cube); // Adding the cube to the list of objects
     // Some rotation

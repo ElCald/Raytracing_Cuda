@@ -1,6 +1,4 @@
-# CMakeLists.txt dans le répertoire 'src'
-
-# Ajouter les fichiers sources
+# Adding source files
 set(SOURCE_FILES
     main.cpp
     ${CMAKE_SOURCE_DIR}/Geometry/geometry.cpp
@@ -10,10 +8,10 @@ set(SOURCE_FILES
     ${CMAKE_SOURCE_DIR}/Utils/light.cpp
 )
 
-# Ajouter l'exécutable
+# Adding executable
 add_executable(main ${SOURCE_FILES})
 
-# Ajouter les répertoires d'inclusion
+# Adding include folders
 include_directories(
     ${CMAKE_SOURCE_DIR}/Geometry
     ${CMAKE_SOURCE_DIR}/GeometricObjects
