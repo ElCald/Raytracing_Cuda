@@ -23,3 +23,53 @@ Ray Camera::generateRay(int x, int y) const
     Vecteur3D ray_direction = (direction + right * px + up * py).normalized();
     return Ray(position, ray_direction);
 }
+
+
+
+
+void Camera::rotateX(double angle)
+{
+    direction.x += angle;
+}
+
+void Camera::rotateY(double angle)
+{
+    direction.y += angle;
+}
+
+
+
+void Camera::rotatePosX(double angle, Point3D centre)
+{
+    position = rotateAroundX(position, centre, angle);
+}
+
+void Camera::rotatePosY(double angle, Point3D centre)
+{
+    position = rotateAroundY(position, centre, angle);
+}
+
+void Camera::rotatePosZ(double angle, Point3D centre)
+{
+    position = rotateAroundZ(position, centre, angle);
+}
+
+
+
+void Camera::translateX(double direc)
+{
+    position.x += direc;
+}
+
+void Camera::translateY(double direc)
+{
+    position.y += direc;
+}
+
+void Camera::translateZ(double direc)
+{
+    position.z += direc;
+}
+
+
+

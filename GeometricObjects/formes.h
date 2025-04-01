@@ -92,9 +92,12 @@ public:
 
     Cube(double _size, const Point3D &_center, Material _materiau);
 
-    void rotateX(double angle);
-    void rotateY(double angle);
-    void rotateZ(double angle);
+    Point3D getCenter();
+    double getSize();
+
+    void rotateX(double angle, Point3D centre);
+    void rotateY(double angle, Point3D centre);
+    void rotateZ(double angle, Point3D centre);
 
     void translateX(double direc);
     void translateY(double direc);

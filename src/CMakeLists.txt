@@ -8,8 +8,11 @@ set(SOURCE_FILES
     ${CMAKE_SOURCE_DIR}/Utils/light.cpp
 )
 
+
+
 # Adding executable
 add_executable(main ${SOURCE_FILES})
+
 
 # Adding include folders
 include_directories(

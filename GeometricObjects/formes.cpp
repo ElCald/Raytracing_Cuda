@@ -298,34 +298,44 @@ void Cube::translateZ(double direc)
     center.z += direc;
 }
 
-void Cube::rotateX(double angle)
+void Cube::rotateX(double angle, Point3D centre)
 {
     for (auto t : cube)
     {
-        t->p1 = rotateAroundX(t->p1, center, angle);
-        t->p2 = rotateAroundX(t->p2, center, angle);
-        t->p3 = rotateAroundX(t->p3, center, angle);
+        t->p1 = rotateAroundX(t->p1, centre, angle);
+        t->p2 = rotateAroundX(t->p2, centre, angle);
+        t->p3 = rotateAroundX(t->p3, centre, angle);
     }
 }
 
-void Cube::rotateY(double angle)
+void Cube::rotateY(double angle, Point3D centre)
 {
     for (auto t : cube)
     {
-        t->p1 = rotateAroundY(t->p1, center, angle);
-        t->p2 = rotateAroundY(t->p2, center, angle);
-        t->p3 = rotateAroundY(t->p3, center, angle);
+        t->p1 = rotateAroundY(t->p1, centre, angle);
+        t->p2 = rotateAroundY(t->p2, centre, angle);
+        t->p3 = rotateAroundY(t->p3, centre, angle);
     }
 }
 
-void Cube::rotateZ(double angle)
+void Cube::rotateZ(double angle, Point3D centre)
 {
     for (auto t : cube)
     {
-        t->p1 = rotateAroundZ(t->p1, center, angle);
-        t->p2 = rotateAroundZ(t->p2, center, angle);
-        t->p3 = rotateAroundZ(t->p3, center, angle);
+        t->p1 = rotateAroundZ(t->p1, centre, angle);
+        t->p2 = rotateAroundZ(t->p2, centre, angle);
+        t->p3 = rotateAroundZ(t->p3, centre, angle);
     }
+}
+
+
+Point3D Cube::getCenter(){
+    return center;
+}
+
+
+double Cube::getSize(){
+    return size;
 }
 
 // implémentation par défaut
