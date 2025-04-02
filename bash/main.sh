@@ -5,6 +5,7 @@ set -e
 
 # Variables
 BUILD_DIR="../build"
+VIDEO_DIR=$BUILD_DIR"/video"
 TEST_DIR="$BUILD_DIR/src"
 EXECUTABLE_NAME="main"
 EXECUTABLE_PATH="$TEST_DIR/$EXECUTABLE_NAME"
@@ -13,6 +14,11 @@ EXECUTABLE_PATH="$TEST_DIR/$EXECUTABLE_NAME"
 if [ ! -d "$BUILD_DIR" ]; then
     echo "Build directory not found! Creating it..."
     mkdir -p "$BUILD_DIR"
+fi
+
+if [ ! -d "$VIDEO_DIR" ]; then
+    echo "Video directory not found! Creating it..."
+    mkdir -p "$VIDEO_DIR"
 fi
 
 # Verify build/test/ existency and create it if necessary

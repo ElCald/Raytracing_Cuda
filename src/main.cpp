@@ -129,8 +129,8 @@ int main()
         sprintf(buffer, "video/frame%03d.ppm", i);
 
 
-        cube5->rotateX((360*nb_tour)/nb_images);
-        cube5->rotateY((360*nb_tour)/nb_images);
+        cube5->rotateX((360*nb_tour)/nb_images, cube5->getCenter());
+        cube5->rotateY((360*nb_tour)/nb_images, cube5->getCenter());
 
         // Creation of the original image (black)
         vector<vector<Color>> image(height, vector<Color>(width, Color(0, 0, 0)));
