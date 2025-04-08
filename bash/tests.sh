@@ -5,32 +5,9 @@ set -e
 
 # Variables
 BUILD_DIR="../build"
-VIDEO_DIR="$BUILD_DIR/video"
-TEST_DIR="$BUILD_DIR/src"
-EXECUTABLE_NAME="main"
+TEST_DIR="$BUILD_DIR/tests"
+EXECUTABLE_NAME="tests"
 EXECUTABLE_PATH="$TEST_DIR/$EXECUTABLE_NAME"
-
-# Vérification des arguments
-if [ "$#" -ne 3 ]; then
-    echo "Usage : $0 <nbsec> <fps> <nbtours>"
-    exit 1
-fi
-
-NB_SEC=$1
-FPS=$2
-NB_TOUR=$3
-
-# Vérifie si les valeurs sont valides
-if [ "$NB_SEC" -gt 300 ] || [ "$FPS" -le 0 ] || [ "$NB_TOUR" -le 0 ]; then
-    echo "Erreur : paramètres invalides."
-    echo "- Le nombre de secondes ne doit pas dépasser 300"
-    echo "- Le nombre de fps doit être > 0"
-    echo "- Le nombre de tours doit être > 0"
-    exit 2
-fi
-
-# Création des répertoires nécessaires
-[ ! -d "$VIDEO_DIR" ] && echo "Creating video dir..." && mkdir -p "$VIDEO_DIR"
 
 # Verify build/ existency and create it if necessary
 if [ ! -d "$BUILD_DIR" ]; then
@@ -66,7 +43,7 @@ fi
 # Step 3: Run the executable
 echo "Running the executable..."
 if [ -f "$EXECUTABLE_PATH" ]; then
-    "$EXECUTABLE_PATH" "$NB_SEC" "$FPS" "$NB_TOUR"
+    "$EXECUTABLE_PATH"
 else
     echo "Executable $EXECUTABLE_NAME not found in $TEST_DIR!"
     exit 1

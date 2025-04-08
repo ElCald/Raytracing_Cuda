@@ -1,32 +1,39 @@
+// scene.h
 #ifndef SCENE_H
 #define SCENE_H
 
-#include "../GeometricObjects/formes.h"
+// Includes
+#include "../GeometricsObjects/forms.h"
 #include "light.h"
 #include "camera.h"
 #include <vector>
 
+using namespace std;
+
+// Scene class
 class Scene
 {
 public:
+    // Attributes
     Camera &camera;
-    std::vector<Light *> lights;
+    vector<Light *> lights;
 
+    // Constructor and Deletor
     Scene(Camera &_camera);
     ~Scene();
 
+    // Methods
     void addObject(vector<Triangle *> &obj);
-    void addObject(Forme *obj);
+    void addObject(Form *obj);
     void addLight(Light *light);
-
-    // bool intersect(const Ray &ray, Point3D &hitPoint, Vecteur3D &normal, int &materiau) const;
-
     void render(vector<vector<Color>> &image, int width, int height);
 
 private:
-    std::vector<Forme *> objects;
+    // Attribute
+    vector<Form *> objects;
 };
 
+// Phong function
 Vecteur3D phongShading(const Point3D &point, const Vecteur3D &normal, const Vecteur3D &viewDir, const std::vector<Light *> lights, const Material &material);
 
 #endif // SCENE_H

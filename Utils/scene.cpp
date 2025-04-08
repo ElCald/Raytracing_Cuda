@@ -1,7 +1,12 @@
+// Include
 #include "scene.h"
 
+/**
+ * @param _camera camera of the scene
+ */
 Scene::Scene(Camera &_camera) : camera(_camera) {}
 
+// Deletor
 Scene::~Scene()
 {
     for (auto obj : objects)
@@ -15,6 +20,9 @@ Scene::~Scene()
     }
 }
 
+/**
+ * @param obj vector of triangle we want to add the the scene
+ */
 void Scene::addObject(vector<Triangle *> &obj)
 {
     for (auto o : obj)
@@ -23,31 +31,28 @@ void Scene::addObject(vector<Triangle *> &obj)
     }
 }
 
-void Scene::addObject(Forme *obj)
+/**
+ * @param obj object we want to add to the scene
+ */
+void Scene::addObject(Form *obj)
 {
     objects.push_back(obj);
 }
 
+/**
+ * @param light light we want to add to the scene
+ */
 void Scene::addLight(Light *light)
 {
     lights.push_back(light);
 }
 
-// bool Scene::intersect(const Ray &ray, Point3D &hitPoint, Vecteur3D &normal, int &materiau) const
-// {
-//     bool hit = false;
-//     double minDist = 1e9;
-//     for (const auto &obj : objects)
-//     {
-//         if (obj->intersection(ray.origine))
-//         { // Simplification, améliorer la détection
-//             hit = true;
-//             materiau = obj->materiau;
-//         }
-//     }
-//     return hit;
-// }
-
+/**
+ * @param image image of the scene
+ * @param width width of the image
+ * @param height height of the image
+ * function that does the render of the scene
+ */
 void Scene::render(vector<vector<Color>> &image, int width, int height)
 {
 
@@ -57,13 +62,14 @@ void Scene::render(vector<vector<Color>> &image, int width, int height)
         {
             Ray ray = camera.generateRay(x, y);
 
-            // Variable pour stocker l'intersection
+            // Variable to store the intersection
             double t, tMin = INFINITY;
-            Forme *closestObj = nullptr;
+            Form *closestObj = nullptr;
 
             for (auto obj : objects)
             {
-                if (obj->intersection(ray, t) && t < tMin) // Si intersection avec l'objet
+                // If intersection with object
+                if (obj->intersection(ray, t) && t < tMin)
                 {
                     tMin = t;
                     closestObj = obj;
@@ -72,17 +78,19 @@ void Scene::render(vector<vector<Color>> &image, int width, int height)
 
             if (closestObj)
             {
-                // Le point d'intersection sur l'objet
+                // The intersection point on the object
                 Point3D hitPoint = ray.origine + ray.direction * tMin;
-                // Calcul de la normale à l'objet à ce point
+
+                // Calculate the normal to the object at this point
                 Vecteur3D normal = closestObj->getNormal(hitPoint);
-                // La direction de la vue (depuis la caméra vers le point d'impact)
+
+                // The direction of view (from the camera towards the point of impact)
                 Vecteur3D viewDir = (camera.position - hitPoint).normalized();
 
-                // Calcul de la couleur avec le modèle de Phong
+                // Colour calculation using the Phong model
                 Vecteur3D phongColor = phongShading(hitPoint, normal, viewDir, lights, closestObj->materiau);
 
-                // Applique la couleur calculée sur l'image
+                // Apply the calculated colour to the image
                 image[y][x] = Color(
                     std::min(255.0, phongColor.x * 255),
                     std::min(255.0, phongColor.y * 255),
@@ -92,40 +100,49 @@ void Scene::render(vector<vector<Color>> &image, int width, int height)
     }
 }
 
-// Fonction pour calculer la couleur avec Phong
+/**
+ * @param point     The 3D point on the surface where shading is computed.
+ * @param normal    The surface normal at the given point.
+ * @param viewDir   The direction vector from the point toward the camera (viewer).
+ * @param lights    The list of lights in the scene.
+ * @param material  The material properties of the surface (ambient, diffuse, specular, shininess).
+ * @return          The resulting color vector from the Phong illumination model.
+ * * Computes the Phong shading at a given point using ambient, diffuse, and specular components.
+ */
 Vecteur3D phongShading(const Point3D &point, const Vecteur3D &normal, const Vecteur3D &viewDir, std::vector<Light *> lights, const Material &material)
 {
     Vecteur3D ambient, diffuse, specular;
 
     for (auto light : lights)
     {
-        // Direction de la lumière (vecteur entre le point et la source lumineuse)
-        Vecteur3D lightDir = light->position - point; // Soustraction entre Point3D et Point3D donne un Vecteur3D
-        lightDir = lightDir.normalized();             // Normaliser pour obtenir un vecteur unitaire
+        // Direction from the point to the light source
+        Vecteur3D lightDir = light->position - point;
+        lightDir = lightDir.normalized();
 
-        // Calcul du vecteur de réflexion
+        // Reflection vector based on the light direction and surface normal
         Vecteur3D reflectDir = (normal * (2.0 * normal.dot(lightDir))) - lightDir;
 
-        // Calcul de la distance entre le point d'impact et la source de lumière
-        double distance = std::sqrt(lightDir.x * lightDir.x + lightDir.y * lightDir.y + lightDir.z * lightDir.z); // Utilisation de norm() pour calculer la distance
+        // Distance between the point and the light source
+        double distance = std::sqrt(lightDir.x * lightDir.x + lightDir.y * lightDir.y + lightDir.z * lightDir.z);
 
-        // Atténuation de la lumière en fonction de la distance (atténuation quadratique)
-        double attenuation = 1.0 / (distance * distance); // Atténuation quadratique
+        // Light attenuation based on distance (quadratic attenuation)
+        double attenuation = 1.0 / (distance * distance);
 
-        // Appliquer l'atténuation à l'intensité de la lumière
+        // Adjust light intensity based on attenuation
         Vecteur3D lightIntensity = light->intensity * attenuation;
 
-        // Composante ambiante
+        // Ambient component
         ambient = ambient + (material.ambient * lightIntensity);
 
-        // Composante diffuse (Lambert)
+        // Diffuse component using Lambertian reflection
         double diff = std::max(normal.dot(lightDir), 0.0);
         diffuse = diffuse + (material.diffuse * (lightIntensity * diff));
 
-        // Composante spéculaire (Phong)
+        // Specular component using Phong model
         double spec = std::pow(std::max(viewDir.dot(reflectDir), 0.0), material.shininess);
         specular = specular + (material.specular * (lightIntensity * spec));
     }
 
+    // Return the total lighting effect
     return ambient + diffuse + specular;
 }

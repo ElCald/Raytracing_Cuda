@@ -1,6 +1,6 @@
-// formes.h
-#ifndef FORMES_H
-#define FORMES_H
+// forms.h
+#ifndef FORMS_H
+#define FORMS_H
 
 // Includes
 #include "../Geometry/geometry.h"
@@ -8,107 +8,126 @@
 
 using namespace std;
 
-// Material class
+// Material Class
 class Material
 {
 public:
-    Material(Vecteur3D _ambient, Vecteur3D _diffuse, Vecteur3D _specular, float _shininess);
-    Vecteur3D ambient;
-    Vecteur3D diffuse;
-    Vecteur3D specular;
+    // Attributes
+    Vecteur3D ambient, diffuse, specular;
     float shininess;
+
+    // Constructor
+    Material(Vecteur3D _ambient, Vecteur3D _diffuse, Vecteur3D _specular, float _shininess);
 };
 
 // Color class
 class Color
 {
 public:
+    // Attributes
     int r, g, b;
 
-    Color(int r, int g, int b);
+    // Constructor
+    Color(int _r, int _g, int _b);
 
+    // to Int
     int toInt() const;
 };
 
 // Forme class
-class Forme
+class Form
 {
 public:
+    // Attributes
     Material materiau;
 
-    Forme(Material _materiau);
+    // Constructor and Destructor
+    Form(Material _materiau);
+    virtual ~Form() {}
 
+    // Methods
     virtual bool intersection(const Ray &r, double &t) const = 0;
     virtual Vecteur3D getNormal(const Point3D &p) const = 0;
 };
 
 // Sphere class
-class Sphere : public Forme
+class Sphere : public Form
 {
 public:
-    Point3D centre;
+    // Attributes
+    Point3D center;
     double rayon;
 
-    Sphere(Point3D _centre, double _rayon, Material _materiau);
+    // Constructor
+    Sphere(Point3D _center, double _rayon, Material _materiau);
 
+    // Methods
     bool intersection(const Ray &r, double &t) const override;
     Vecteur3D getNormal(const Point3D &p) const override;
 };
 
 // Triangle class
-class Triangle : public Forme
+class Triangle : public Form
 {
 public:
+    // Attributes
     Point3D p1, p2, p3;
 
+    // Constructor
     Triangle(Point3D _p1, Point3D _p2, Point3D _p3, Material _materiau);
 
+    // Methods
     bool intersection(const Ray &r, double &t) const override;
-    Vecteur3D getNormal(const Point3D &p) const override;
     bool contains(const Point3D &p) const;
+    Vecteur3D getNormal(const Point3D &p) const override;
 };
 
-// Carre class
-class Carre : public Forme
+// Square class
+class Square : public Form
 {
 public:
+    // Attributes
     Point3D p1, p2, p3, p4;
 
-    Carre(Point3D _p1, Point3D _p2, Point3D _p3, Point3D _p4, Material _materiau);
+    // Constructor
+    Square(Point3D _p1, Point3D _p2, Point3D _p3, Point3D _p4, Material _materiau);
 
+    // Methods
     bool intersection(const Ray &r, double &t) const override;
     Vecteur3D getNormal(const Point3D &p) const override;
 };
 
 // Cube class
-class Cube : public Forme
+class Cube : public Form
 {
 private:
+    // Attributes
     double size;
     Point3D center;
 
 public:
+    // Attributes
     vector<Triangle *> cube;
 
+    // Constructor
     Cube(double _size, const Point3D &_center, Material _materiau);
 
+    // Methods
     Point3D getCenter();
     double getSize();
-
-    void rotateX(double angle, Point3D centre);
-    void rotateY(double angle, Point3D centre);
-    void rotateZ(double angle, Point3D centre);
-
+    void rotateX(double angle, Point3D center);
+    void rotateY(double angle, Point3D center);
+    void rotateZ(double angle, Point3D center);
     void translateX(double direc);
     void translateY(double direc);
     void translateZ(double direc);
-
     bool intersection(const Ray &r, double &t) const override;
     Vecteur3D getNormal(const Point3D &p) const override;
 };
 
+// Some functions to rotate a point
 Point3D rotateAroundX(const Point3D &P, const Point3D &O, double angle);
 Point3D rotateAroundY(const Point3D &P, const Point3D &O, double angle);
 Point3D rotateAroundZ(const Point3D &P, const Point3D &O, double angle);
 
-#endif // FORMES_H
+#endif // FORMS_H
