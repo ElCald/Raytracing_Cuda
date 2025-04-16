@@ -38,7 +38,7 @@ void savePPM(const string &filename, const Color *image)
 
 int main(int argc, char *argv[])
 {
-    // Arguments gestion
+    // -- Gestion des arguments (inchangée) --
     if (argc != 4)
     {
         fprintf(stderr, "Usage : %s [<nbsec> <fps> <nbturns>]\n", argv[0]);
@@ -49,141 +49,105 @@ int main(int argc, char *argv[])
     int fps = atoi(argv[2]);
     int nb_turns = atoi(argv[3]);
 
-    if (nb_sec > 300 || fps < 0 || nb_turns < 0)
+    if (nb_sec > 300 || fps < 1 || nb_turns < 1)
     {
-        fprintf(stderr, "Usage : %s [<nbsec> <fps> <nbtours>]\n", argv[0]);
-        fprintf(stderr, "- The number of seconds must not exceed 5min (300 seconds)\n");
-        fprintf(stderr, "- The number of fps must be greater than 0 fps\n");
-        fprintf(stderr, "- The number of rotations must be greater than 0\n");
+        fprintf(stderr, "Arguments invalides.\n");
         exit(2);
     }
 
-    // ---- HOST variables ----
-
-    // Calculating the number of images to be generated
     int nb_images = nb_sec * fps;
+    system("rm -r ../build/video/*.ppm");
+    system("rm ../build/output.mp4");
+    char buffer[256];
 
-    // Commands to clean video folder
-    int ret = system("rm -r ../build/video/*.ppm");
-    ret = system("rm ../build/output.mp4");
-
-    // Creation of a buffer to execute commands after
-    char buffer[32];
-
-    // Definition of the camera
-    Camera cam(Point3D(0, 0, 5), Vecteur3D(0, 0, -1), 90, WIDTH_PIXEL, HEIGHT_PIXEL);
-
-    // Definition of the scene
+    // -- Caméra et scène --
+    Camera cam(Point3D(0, 0, 5), Vecteur3D(0, 0, -1), 90, WIDTH_PIXEL, HEIGHT_PIXEL, Vecteur3D(1, 0, 0), Vecteur3D(0, 1, 0));
     Scene scene(cam);
 
-    // Lights definition
-    Light light1(Point3D(-1.5, 0, -5), Vecteur3D(0.5, 1, 0.5));
-    scene.addLight(light1);
+    // -- Lumières --
+    scene.addLight(Light(Point3D(-1.5, 0, -5), Vecteur3D(0.5, 1, 0.5)));
+    scene.addLight(Light(Point3D(1, 0, 5), Vecteur3D(0.4, 0.4, 1)));
 
-    Light light2(Point3D(1, 0, 5), Vecteur3D(0.4, 0.4, 1));
-    scene.addLight(light2);
+    // -- Matériaux --
+    Material matOrange(Vecteur3D(0.1, 0.1, 0.1), Vecteur3D(1, 0.307, 0.168), Vecteur3D(1, 1, 1), 300);
 
-    // Materials definition
-    Material materialOrange(Vecteur3D(0.1, 0.1, 0.1), Vecteur3D(1, 0.307, 0.168), Vecteur3D(1, 1, 1), 300);
+    // -- Objet : cube --
+    Cube *cube = new Cube(3.0, Point3D(0, 0, 0), matOrange);
+    scene.addTriangles(cube->triangles, 12);
 
-    // Cube creation
-    Cube *cube = new Cube(3.0, Point3D(0, 0, 0), materialOrange);
-    scene.addObject(cube->cube);
+    // -- Triangle device --
+    Triangle *d_triangles;
+    cudaMalloc(&d_triangles, scene.numTriangles * sizeof(Triangle));
+    cudaMemcpy(d_triangles, scene.triangles, scene.numTriangles * sizeof(Triangle), cudaMemcpyHostToDevice);
 
-    // Definition of cube's center
-    Point3D centre_cube = cube->getCenter();
-    centre_cube.x += cube->getSize() / 2;
-    centre_cube.y += cube->getSize() / 2;
-    centre_cube.z -= cube->getSize() / 2;
+    // -- Lights device --
+    Light *d_lights;
+    cudaMalloc(&d_lights, scene.numLights * sizeof(Light));
+    cudaMemcpy(d_lights, scene.lights, scene.numLights * sizeof(Light), cudaMemcpyHostToDevice);
 
-    // ---- DEVICE variables ----
+    // -- Camera device --
+    Camera d_cam = {cam.position, cam.direction, cam.fov, cam.width, cam.height, Vecteur3D(1, 0, 0), Vecteur3D(0, 1, 0)};
+    Camera *d_camera;
+    cudaMalloc(&d_camera, sizeof(Camera));
+    cudaMemcpy(d_camera, &d_cam, sizeof(Camera), cudaMemcpyHostToDevice);
 
-    // Image
+    // -- Image --
     Color *d_image;
     cudaMalloc(&d_image, WIDTH_PIXEL * HEIGHT_PIXEL * sizeof(Color));
 
-    LightGPU *d_lights;
-    cudaMalloc(&d_lights, scene.getLightCount() * sizeof(Light));
-    cudaMemcpy(d_lights, scene.getLights(), scene.getLightCount() * sizeof(Light), cudaMemcpyHostToDevice);
-
-    CameraGPU d_cam;
-    d_cam.position = cam.position;   // Point3D
-    d_cam.direction = cam.direction; // Vecteur3D
-    d_cam.fov = cam.fov;
-    d_cam.width = cam.width;
-    d_cam.height = cam.height;
-
-    CameraGPU *d_camera;
-    cudaMalloc(&d_camera, sizeof(CameraGPU));
-    cudaMemcpy(d_camera, &d_cam, sizeof(CameraGPU), cudaMemcpyHostToDevice);
-
-    CubeGPU *d_cube;
-    cudaMalloc(&d_cube, sizeof(CubeGPU));
-
-    CubeGPU gpuCube(cube->getSize(), cube->getCenter(), cube->materiau);
-
-    // Copie du CubeGPU vers le GPU
-    cudaMemcpy(d_cube, &gpuCube, sizeof(CubeGPU), cudaMemcpyHostToDevice);
-
-    // Time measure
-    auto t_avant = high_resolution_clock::now(); // Start
+    auto t_start = high_resolution_clock::now();
 
     for (int i = 0; i < nb_images; i++)
     {
-        // Name of the ouput image
         sprintf(buffer, "video/frame%03d.ppm", i);
 
-        // Turn the cube
-        cube->rotateX((180 * nb_turns) / nb_images, cube->getCenter());
-        cube->rotateY((360 * nb_turns) / nb_images, cube->getCenter());
+        // Rotation du cube
+        cube->rotateX((180.0 * nb_turns) / nb_images, cube->getCenter());
+        cube->rotateY((360.0 * nb_turns) / nb_images, cube->getCenter());
 
-        // Creation of the original image (black)
+        // Copie des triangles mis à jour
+        cudaMemcpy(d_triangles, cube->triangles, scene.numTriangles * sizeof(Triangle), cudaMemcpyHostToDevice);
+
+        // Image host
         Color *h_image = new Color[WIDTH_PIXEL * HEIGHT_PIXEL];
 
-        // Initialisation en noir (0,0,0)
-        for (int i = 0; i < WIDTH_PIXEL * HEIGHT_PIXEL; ++i)
-            h_image[i] = Color(0, 0, 0);
+        // Kernel
+        dim3 blockDim(16, 16);
+        dim3 gridDim((WIDTH_PIXEL + blockDim.x - 1) / blockDim.x, (HEIGHT_PIXEL + blockDim.y - 1) / blockDim.y);
 
-        // Do the render in the image
-        renderKernel<<<gridDim, blockDim>>>(d_image, d_cube, scene.getObjectCount(), d_camera, d_lights, scene.getLightCount());
+        renderKernel<<<gridDim, blockDim>>>(d_image, d_triangles, scene.numTriangles, d_camera, d_lights, scene.numLights);
 
-        // Vérification d'erreur
-        cudaError_t err = cudaGetLastError();
-        if (err != cudaSuccess)
-        {
-            std::cerr << "CUDA error: " << cudaGetErrorString(err) << std::endl;
-        }
+        cudaDeviceSynchronize();
 
+        // Copie vers host
         cudaMemcpy(h_image, d_image, WIDTH_PIXEL * HEIGHT_PIXEL * sizeof(Color), cudaMemcpyDeviceToHost);
 
-        // Save image
+        // Sauvegarde image
         savePPM(buffer, h_image);
-
         delete[] h_image;
-        cudaFree(d_image);
-        cudaFree(d_camera);
-        cudaFree(d_lights);
-        cudaFree(d_cube);
     }
 
-    auto t_apres = high_resolution_clock::now(); // End
+    auto t_end = high_resolution_clock::now();
+    duration<double> t_total = t_end - t_start;
+
+    // Nettoyage
+    cudaFree(d_image);
+    cudaFree(d_camera);
+    cudaFree(d_lights);
+    cudaFree(d_triangles);
 
     // Creation of the video using ffmpeg
     char ffmpegCommand[256];
     sprintf(ffmpegCommand, "ffmpeg -y -framerate %d -i ../build/video/frame%%03d.ppm -c:v libx264 -pix_fmt yuv420p output.mp4", fps);
 
     // Handle potential error
-    ret = system(ffmpegCommand);
+    int ret = system(ffmpegCommand);
     if (ret != 0)
     {
         cerr << "Erreur lors de la création de la vidéo avec ffmpeg." << endl;
     }
 
-    // Computation of the time
-    duration<double> t_total = t_apres - t_avant;
-
-    // Final print
-    cout << "Images generated: video/framexxx.ppm, with an average fps of : " << (nb_images / t_total.count()) << " (" << t_total.count() << "s)" << endl;
+    cout << "Images générées avec FPS moyen : " << (nb_images / t_total.count()) << " (" << t_total.count() << "s)" << endl;
 
     return 0;
 }

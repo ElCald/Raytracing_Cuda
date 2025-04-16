@@ -6,7 +6,8 @@
 #include <math.h>
 
 // 3D Vector struct
-struct Vecteur3D {
+struct Vecteur3D
+{
   // Attributes
   double x, y, z;
 
@@ -30,7 +31,8 @@ struct Vecteur3D {
 };
 
 // 3D Point struct
-struct Point3D {
+struct Point3D
+{
   // Attributes
   double x, y, z;
 
@@ -44,7 +46,8 @@ struct Point3D {
 };
 
 // Ray struct
-struct Ray {
+struct Ray
+{
   // Attributes
   Point3D origine;
   Vecteur3D direction;

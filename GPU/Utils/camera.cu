@@ -11,8 +11,8 @@
  * @param _width wifth of the camera
  * @param _height height of the camera
  */
-__host__ __device__ Camera::Camera(Point3D _position, Vecteur3D _direction, double _fov, int _width, int _height)
-    : position(_position), direction(_direction.normalized()), fov(_fov), width(_width), height(_height)
+__host__ __device__ Camera::Camera(Point3D _position, Vecteur3D _direction, double _fov, int _width, int _height, Vecteur3D _right, Vecteur3D _up)
+    : position(_position), direction(_direction.normalized()), fov(_fov), width(_width), height(_height), right(_right), up(_up)
 {
     right = Vecteur3D(1, 0, 0);
     up = Vecteur3D(0, 1, 0);

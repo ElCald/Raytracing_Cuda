@@ -7,8 +7,8 @@
 #include "../GeometricsObjects/forms.h"
 #include <vector>
 
-// Camera class
-class Camera
+// Camera struct
+struct Camera
 {
 public:
     // Attributes
@@ -19,7 +19,7 @@ public:
     Vecteur3D right, up;
 
     // Constructor
-    __host__ __device__ Camera(Point3D _position, Vecteur3D _direction, double _fov, int _width, int _height);
+    __host__ __device__ Camera(Point3D _position, Vecteur3D _direction, double _fov, int _width, int _height, Vecteur3D _right, Vecteur3D _up);
 
     // Methods
     __host__ __device__ Ray generateRay(int x, int y) const;

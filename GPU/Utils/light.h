@@ -5,8 +5,8 @@
 // Includes
 #include "../Geometry/geometry.h"
 
-// Light class
-class Light
+// Struct struct
+struct Light
 {
 public:
     // Attributes

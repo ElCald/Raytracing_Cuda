@@ -12,7 +12,8 @@
 using namespace std;
 
 // Material struct
-struct Material {
+struct Material
+{
   // Attributes
   Vecteur3D ambient, diffuse, specular;
   float shininess;
@@ -20,25 +21,26 @@ struct Material {
   // Constructors
   __host__ __device__ Material() {}
   __host__ __device__ Material(Vecteur3D _a, Vecteur3D _d, Vecteur3D _s,
-                               float _sh)
-      : ambient(_a), diffuse(_d), specular(_s), shininess(_sh) {}
+                               float _sh);
 };
 
 // Color struct
-struct Color {
+struct Color
+{
   // Attributes
   int r, g, b;
 
   // Constructors
-  __host__ __device__ Color() : r(0), g(0), b(0) {}
+  __host__ __device__ Color();
 
   // toInt
-  __host__ __device__ Color(int _r, int _g, int _b) : r(_r), g(_g), b(_b) {}
-  __host__ __device__ int toInt() const { return (r << 16) | (g << 8) | b; }
+  __host__ __device__ Color(int _r, int _g, int _b);
+  __host__ __device__ int toInt() const;
 };
 
 // Triangle struct
-struct Triangle {
+struct Triangle
+{
   // Attributes
   Point3D p1, p2, p3;
   Material mat;
@@ -55,7 +57,8 @@ struct Triangle {
 };
 
 // Cube struct
-struct Cube {
+struct Cube
+{
   // Attributes
   Triangle triangles[12];
   double size;
@@ -79,18 +82,20 @@ struct Cube {
 };
 
 // Pyramid struct
-struct Pyramide {
+struct Pyramid
+{
   // Attributes
   Triangle triangles[4];
 
   // Constructor
-  __host__ __device__ Pyramide(const Point3D &base1, const Point3D &base2,
-                               const Point3D &base3, const Point3D &apex,
-                               const Material &mat);
+  __host__ __device__ Pyramid(const Point3D &base1, const Point3D &base2,
+                              const Point3D &base3, const Point3D &apex,
+                              const Material &mat);
 };
 
 // Sphere struct
-struct TriangleSphere {
+struct TriangleSphere
+{
   // Attributes
   Triangle triangles[MAX_SPHERE_TRIANGLES];
   int count;

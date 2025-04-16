@@ -12,15 +12,19 @@ set(SOURCE_FILES
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -Wall -Wextra -march=native -mtune=native")
 
 # Flags for CUDA (device)
-set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -O3 --use_fast_math -Xcompiler=-Wall,-Wextra")
-
-# Adding executable
-add_executable(main ${SOURCE_FILES})
-
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -O3 --use_fast_math -Xcompiler=-Wall,-Wextra -rdc=true")
 
 # Adding include folders
 include_directories(
     ${CMAKE_SOURCE_DIR}/Geometry
     ${CMAKE_SOURCE_DIR}/GeometricObjects
     ${CMAKE_SOURCE_DIR}/Utils
+)
+
+# Adding executable
+add_executable(main ${SOURCE_FILES})
+
+set_target_properties(main PROPERTIES
+    CUDA_SEPARABLE_COMPILATION ON
+    LINKER_LANGUAGE CUDA
 )
