@@ -30,12 +30,9 @@ struct Scene
 };
 
 // Kernel
-__global__ void renderKernel(Color *image, Triangle *triangles, int numTriangles,
-                             Camera *camera, Light *lights, int numLights);
+__global__ void renderKernel(Color *__restrict__ image, const Triangle *__restrict__ triangles, int numTriangles, const Camera *__restrict__ camera, const Light *__restrict__ lights, int numLights);
 
 // Phong function
-__device__ Vecteur3D phongShading(const Point3D &point, const Vecteur3D &normal,
-                                  const Vecteur3D &viewDir, Light *lights, int numLights,
-                                  const Material &material);
+__device__ Vecteur3D phongShading(const Point3D &point, const Vecteur3D &normal, const Vecteur3D &viewDir, const Light *__restrict__ lights, int numLights, const Material &material);
 
 #endif // SCENE_H

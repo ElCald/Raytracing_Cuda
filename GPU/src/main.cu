@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
     int nb_sec = atoi(argv[1]);
     int fps = atoi(argv[2]);
     int nb_turns = atoi(argv[3]);
+    int blockSizeX = 16, blockSizeY = 16;
 
     if (nb_sec > 300 || fps < 1 || nb_turns < 1)
     {
@@ -95,6 +96,14 @@ int main(int argc, char *argv[])
     Color *d_image;
     cudaMalloc(&d_image, WIDTH_PIXEL * HEIGHT_PIXEL * sizeof(Color));
 
+    // Mesure du temps
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+
+    float milliseconds = 0;
+    float total_milliseconds = 0;
+
     auto t_start = high_resolution_clock::now();
 
     for (int i = 0; i < nb_images; i++)
@@ -112,12 +121,21 @@ int main(int argc, char *argv[])
         Color *h_image = new Color[WIDTH_PIXEL * HEIGHT_PIXEL];
 
         // Kernel
-        dim3 blockDim(16, 16);
+        dim3 blockDim(64, 4);
         dim3 gridDim((WIDTH_PIXEL + blockDim.x - 1) / blockDim.x, (HEIGHT_PIXEL + blockDim.y - 1) / blockDim.y);
+
+        cudaEventRecord(start);
 
         renderKernel<<<gridDim, blockDim>>>(d_image, d_triangles, scene.numTriangles, d_camera, d_lights, scene.numLights);
 
-        cudaDeviceSynchronize();
+        cudaEventRecord(stop);
+        cudaEventSynchronize(stop);
+
+        cudaEventElapsedTime(&milliseconds, start, stop);
+
+        total_milliseconds += milliseconds;
+
+        // cudaDeviceSynchronize();
 
         // Copie vers host
         cudaMemcpy(h_image, d_image, WIDTH_PIXEL * HEIGHT_PIXEL * sizeof(Color), cudaMemcpyDeviceToHost);
@@ -147,6 +165,9 @@ int main(int argc, char *argv[])
         cerr << "Erreur lors de la création de la vidéo avec ffmpeg." << endl;
     }
 
+    float fps2 = 1000.0f * nb_images / total_milliseconds;
+
+    cout << "Generation kernel avec FPS moyen : " << fps2 << endl;
     cout << "Images générées avec FPS moyen : " << (nb_images / t_total.count()) << " (" << t_total.count() << "s)" << endl;
 
     return 0;

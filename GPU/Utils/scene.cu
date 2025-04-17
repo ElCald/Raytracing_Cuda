@@ -44,20 +44,23 @@ __host__ __device__ void Scene::addLight(const Light &light)
  * @param numLights The number of lights in the scene.
  * function that does the render of the scene
  */
-__global__ void renderKernel(Color *image, Triangle *triangles, int numTriangles,
-                             Camera *camera, Light *lights, int numLights)
+__global__ void renderKernel(Color *__restrict__ image, const Triangle *__restrict__ triangles, int numTriangles, const Camera *__restrict__ camera, const Light *__restrict__ lights, int numLights)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (x >= WIDTH_PIXEL || y >= HEIGHT_PIXEL)
         return;
+
     int idx = y * WIDTH_PIXEL + x;
 
+    // Charger localement les données caméra (plus rapide que memory access)
     Ray ray = camera->generateRay(x, y);
-    double t, tMin = INFINITY;
+
+    double t, tMin = 1e20;
     int closestIdx = -1;
 
+    // Chercher l'intersection la plus proche
     for (int i = 0; i < numTriangles; ++i)
     {
         if (triangles[i].intersection(ray, t) && t < tMin)
@@ -67,23 +70,23 @@ __global__ void renderKernel(Color *image, Triangle *triangles, int numTriangles
         }
     }
 
-    if (closestIdx != -1)
-    {
-        Triangle tri = triangles[closestIdx];
-        Point3D hitPoint = ray.at(tMin);
-        Vecteur3D normal = tri.getNormal(hitPoint);
-        Vecteur3D viewDir = (camera->position - hitPoint).normalized();
-        Vecteur3D colorVec = phongShading(hitPoint, normal, viewDir, lights, numLights, tri.mat);
-
-        image[idx] = Color(
-            static_cast<int>(fmin(255.0, colorVec.x * 255.0)),
-            static_cast<int>(fmin(255.0, colorVec.y * 255.0)),
-            static_cast<int>(fmin(255.0, colorVec.z * 255.0)));
-    }
-    else
+    // Si intersection trouvée, calculer la couleur
+    if (closestIdx == -1)
     {
         image[idx] = Color(0, 0, 0);
+        return;
     }
+
+    const Triangle &tri = triangles[closestIdx];
+    Point3D hitPoint = ray.at(tMin);
+    Vecteur3D normal = tri.getNormal(hitPoint);
+    Vecteur3D viewDir = (camera->position - hitPoint).normalized();
+    Vecteur3D colorVec = phongShading(hitPoint, normal, viewDir, lights, numLights, tri.mat);
+
+    image[idx] = Color(
+        static_cast<int>(fmin(255.0, colorVec.x * 255.0)),
+        static_cast<int>(fmin(255.0, colorVec.y * 255.0)),
+        static_cast<int>(fmin(255.0, colorVec.z * 255.0)));
 }
 
 /**
@@ -96,7 +99,7 @@ __global__ void renderKernel(Color *image, Triangle *triangles, int numTriangles
  * @return          The resulting color vector from the Phong illumination model.
  * * Computes the Phong shading at a given point using ambient, diffuse, and specular components.
  */
-__device__ Vecteur3D phongShading(const Point3D &point, const Vecteur3D &normal, const Vecteur3D &viewDir, Light *lights, int numLights, const Material &material)
+__device__ Vecteur3D phongShading(const Point3D &point, const Vecteur3D &normal, const Vecteur3D &viewDir, const Light *__restrict__ lights, int numLights, const Material &material)
 {
     Vecteur3D ambient(0, 0, 0), diffuse(0, 0, 0), specular(0, 0, 0);
 
