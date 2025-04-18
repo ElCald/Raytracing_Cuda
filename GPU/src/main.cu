@@ -48,7 +48,6 @@ int main(int argc, char *argv[])
     int nb_sec = atoi(argv[1]);
     int fps = atoi(argv[2]);
     int nb_turns = atoi(argv[3]);
-    int blockSizeX = 16, blockSizeY = 16;
 
     if (nb_sec > 300 || fps < 1 || nb_turns < 1)
     {
@@ -57,8 +56,12 @@ int main(int argc, char *argv[])
     }
 
     int nb_images = nb_sec * fps;
-    system("rm -r ../build/video/*.ppm");
-    system("rm ../build/output.mp4");
+    int ret = system("rm -r ../build/video/*.ppm");
+    if (ret != 0)
+        cerr << "Erreur lors de la création de la vidéo avec ffmpeg." << endl;
+    ret = system("rm ../build/output.mp4");
+    if (ret != 0)
+        cerr << "Erreur lors de la création de la vidéo avec ffmpeg." << endl;
     char buffer[256];
 
     // -- Caméra et scène --
@@ -75,6 +78,21 @@ int main(int argc, char *argv[])
     // -- Objet : cube --
     Cube *cube = new Cube(3.0, Point3D(0, 0, 0), matOrange);
     scene.addTriangles(cube->triangles, 12);
+
+    // -- Objet : pyramid --
+    /*Pyramid *pyramid = new Pyramid(
+        Point3D(-1, -1, 0), // base point 1
+        Point3D(1, -1, 0),  // base point 2
+        Point3D(0, 1, 0),   // base point 3
+        Point3D(0, 0, 2),   // apex
+        matOrange, Point3D(0, 0, 0));
+    scene.addTriangles(pyramid->triangles, 4);*/
+
+    // -- Objet : sphère --
+    /*TriangleSphere *sphere = new TriangleSphere(Point3D(0, 0, 0));
+    sphere->generate(Point3D(0, 0, 0), 1.5, 20, 20, matOrange);
+
+    scene.addTriangles(sphere->triangles, sphere->count);*/
 
     // -- Triangle device --
     Triangle *d_triangles;
@@ -96,7 +114,7 @@ int main(int argc, char *argv[])
     Color *d_image;
     cudaMalloc(&d_image, WIDTH_PIXEL * HEIGHT_PIXEL * sizeof(Color));
 
-    // Mesure du temps
+    // Mesure du temps kernel
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
@@ -110,9 +128,17 @@ int main(int argc, char *argv[])
     {
         sprintf(buffer, "video/frame%03d.ppm", i);
 
-        // Rotation du cube
+        // Cube rotation
         cube->rotateX((180.0 * nb_turns) / nb_images, cube->getCenter());
         cube->rotateY((360.0 * nb_turns) / nb_images, cube->getCenter());
+
+        // Pyramid rotation
+        /*pyramid->rotateX((180.0 * nb_turns) / nb_images, pyramid->getCenter());
+        pyramid->rotateY((360.0 * nb_turns) / nb_images, pyramid->getCenter());*/
+
+        // Sphere rotation
+        /*sphere->rotateX((180.0 * nb_turns) / nb_images, sphere->getCenter());
+        sphere->rotateY((360.0 * nb_turns) / nb_images, sphere->getCenter());*/
 
         // Copie des triangles mis à jour
         cudaMemcpy(d_triangles, cube->triangles, scene.numTriangles * sizeof(Triangle), cudaMemcpyHostToDevice);
@@ -121,7 +147,7 @@ int main(int argc, char *argv[])
         Color *h_image = new Color[WIDTH_PIXEL * HEIGHT_PIXEL];
 
         // Kernel
-        dim3 blockDim(64, 4);
+        dim3 blockDim(128, 4);
         dim3 gridDim((WIDTH_PIXEL + blockDim.x - 1) / blockDim.x, (HEIGHT_PIXEL + blockDim.y - 1) / blockDim.y);
 
         cudaEventRecord(start);
@@ -129,13 +155,14 @@ int main(int argc, char *argv[])
         renderKernel<<<gridDim, blockDim>>>(d_image, d_triangles, scene.numTriangles, d_camera, d_lights, scene.numLights);
 
         cudaEventRecord(stop);
+
         cudaEventSynchronize(stop);
 
         cudaEventElapsedTime(&milliseconds, start, stop);
 
         total_milliseconds += milliseconds;
 
-        // cudaDeviceSynchronize();
+        cudaDeviceSynchronize();
 
         // Copie vers host
         cudaMemcpy(h_image, d_image, WIDTH_PIXEL * HEIGHT_PIXEL * sizeof(Color), cudaMemcpyDeviceToHost);
@@ -159,15 +186,13 @@ int main(int argc, char *argv[])
     sprintf(ffmpegCommand, "ffmpeg -y -framerate %d -i ../build/video/frame%%03d.ppm -c:v libx264 -pix_fmt yuv420p output.mp4", fps);
 
     // Handle potential error
-    int ret = system(ffmpegCommand);
+    ret = system(ffmpegCommand);
     if (ret != 0)
-    {
         cerr << "Erreur lors de la création de la vidéo avec ffmpeg." << endl;
-    }
 
     float fps2 = 1000.0f * nb_images / total_milliseconds;
 
-    cout << "Generation kernel avec FPS moyen : " << fps2 << endl;
+    cout << "Generation kernel avec FPS moyen : " << fps2 << " (" << (total_milliseconds / 1000.0f) << "s)" << endl;
     cout << "Images générées avec FPS moyen : " << (nb_images / t_total.count()) << " (" << t_total.count() << "s)" << endl;
 
     return 0;

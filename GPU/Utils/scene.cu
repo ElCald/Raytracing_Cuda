@@ -37,7 +37,7 @@ __host__ __device__ void Scene::addLight(const Light &light)
 
 /**
  * @param image image of the scene
- * @param trignales The list of objects in the scene.
+ * @param triangles The list of objects in the scene.
  * @param numTriangles The number of objects in the scene.
  * @param camera Camera of the scene.
  * @param lights The list of lights in the scene.
