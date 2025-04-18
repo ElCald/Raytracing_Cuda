@@ -13,4 +13,4 @@ set(CMAKE_BUILD_TYPE Release)
 
 # Adding subdirectories (src, tests)
 add_subdirectory(src/)
-#add_subdirectory(tests/)
+add_subdirectory(tests/)

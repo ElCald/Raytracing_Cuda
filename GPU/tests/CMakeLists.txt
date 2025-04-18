@@ -16,15 +16,22 @@ FetchContent_Declare(
 
 # Adding source files
 set(SOURCE_FILES
-    tests.cpp
-    ${CMAKE_SOURCE_DIR}/Geometry/geometry.cpp
+    tests.cu
+    ${CMAKE_SOURCE_DIR}/Geometry/geometry.cu
 )
 
-# Adding some optimal flags
-add_compile_options(-Ofast -Wall -Wextra -march=native -mtune=native)
+# Flags for C++ (host)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -Wall -Wextra -march=native -mtune=native")
+
+# Flags for CUDA (device)
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -O3 --use_fast_math -Xcompiler=-Wall,-Wextra -rdc=true")
 
 # Creation of test executable
 add_executable(tests ${SOURCE_FILES})
+
+set_target_properties(tests PROPERTIES
+    CUDA_SEPARABLE_COMPILATION ON
+)
 
 # Link with GoogleTest
 target_link_libraries(tests PRIVATE gtest gtest_main)
