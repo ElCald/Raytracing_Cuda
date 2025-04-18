@@ -131,6 +131,13 @@ __host__ __device__ Vecteur3D Triangle::getNormal([[maybe_unused]] const Point3D
 }
 
 // ---- Cube Implementation ----
+
+/**
+ * @brief Constructor for the cube.
+ * @param _size Size of the cube.
+ * @param _center Center of the cube.
+ * @param _mat Material of the cube.
+ */
 __host__ __device__ Cube::Cube(double _size, const Point3D &_center, const Material &_mat)
     : size(_size), center(_center)
 {
@@ -167,6 +174,11 @@ __host__ __device__ Cube::Cube(double _size, const Point3D &_center, const Mater
     translateZ(center.z);
 }
 
+/**
+ * @brief Rotates the cube around the X axis.
+ * @param angle Rotation angle in degrees.
+ * @param c Center of rotation.
+ */
 __host__ __device__ void Cube::rotateX(double angle, const Point3D &c)
 {
     for (int i = 0; i < 12; ++i)
@@ -177,6 +189,11 @@ __host__ __device__ void Cube::rotateX(double angle, const Point3D &c)
     }
 }
 
+/**
+ * @brief Rotates the cube around the Y axis.
+ * @param angle Rotation angle in degrees.
+ * @param c Center of rotation.
+ */
 __host__ __device__ void Cube::rotateY(double angle, const Point3D &c)
 {
     for (int i = 0; i < 12; ++i)
@@ -187,6 +204,11 @@ __host__ __device__ void Cube::rotateY(double angle, const Point3D &c)
     }
 }
 
+/**
+ * @brief Rotates the cube around the Z axis.
+ * @param angle Rotation angle in degrees.
+ * @param c Center of rotation.
+ */
 __host__ __device__ void Cube::rotateZ(double angle, const Point3D &c)
 {
     for (int i = 0; i < 12; ++i)
@@ -197,6 +219,10 @@ __host__ __device__ void Cube::rotateZ(double angle, const Point3D &c)
     }
 }
 
+/**
+ * @brief Translates the cube along the X axis.
+ * @param val Translation value.
+ */
 __host__ __device__ void Cube::translateX(double val)
 {
     for (int i = 0; i < 12; ++i)
@@ -208,6 +234,10 @@ __host__ __device__ void Cube::translateX(double val)
     center.x += val;
 }
 
+/**
+ * @brief Translates the cube along the Y axis.
+ * @param val Translation value.
+ */
 __host__ __device__ void Cube::translateY(double val)
 {
     for (int i = 0; i < 12; ++i)
@@ -219,6 +249,10 @@ __host__ __device__ void Cube::translateY(double val)
     center.y += val;
 }
 
+/**
+ * @brief Translates the cube along the Z axis.
+ * @param val Translation value.
+ */
 __host__ __device__ void Cube::translateZ(double val)
 {
     for (int i = 0; i < 12; ++i)
@@ -230,11 +264,36 @@ __host__ __device__ void Cube::translateZ(double val)
     center.z += val;
 }
 
-__host__ __device__ Point3D Cube::getCenter() const { return center; }
-__host__ __device__ double Cube::getSize() const { return size; }
+/**
+ * @brief Gets the center of the cube.
+ * @return The center point of the cube.
+ */
+__host__ __device__ Point3D Cube::getCenter() const
+{
+    return center;
+}
+
+/**
+ * @brief Gets the size of the cube.
+ * @return The size (edge length) of the cube.
+ */
+__host__ __device__ double Cube::getSize() const
+{
+    return size;
+}
 
 // ---- Pyramid Implementation ----
-__host__ __device__ Pyramid::Pyramid(const Point3D &b1, const Point3D &b2, const Point3D &b3, const Point3D &apex, const Material &mat)
+
+/**
+ * @brief Constructor for the pyramid.
+ * @param b1 First point of the base pyramid.
+ * @param b2 Second point of the base pyramid.
+ * @param b3 Third point of the base pyramid.
+ * @param apex Apex of the pyramid.
+ * @param mat Material of the pyramid.
+ * @param _center Center of the pyramid.
+ */
+__host__ __device__ Pyramid::Pyramid(const Point3D &b1, const Point3D &b2, const Point3D &b3, const Point3D &apex, const Material &mat, const Point3D &_center) : center(center)
 {
     triangles[0] = Triangle(b1, b2, b3, mat);   // Base
     triangles[1] = Triangle(b1, b2, apex, mat); // Side 1
@@ -242,9 +301,61 @@ __host__ __device__ Pyramid::Pyramid(const Point3D &b1, const Point3D &b2, const
     triangles[3] = Triangle(b3, b1, apex, mat); // Side 3
 }
 
-// ---- Sphere Generation ----
-__host__ TriangleSphere::TriangleSphere() : count(0) {}
+/**
+ * @brief Rotates the pyramid around the X axis.
+ * @param angle Rotation angle in degrees.
+ * @param c Center of rotation.
+ */
+__host__ __device__ void Pyramid::rotateX(double angle, const Point3D &c)
+{
+    for (int i = 0; i < 4; ++i)
+    {
+        triangles[i].p1 = rotateAroundX(triangles[i].p1, c, angle);
+        triangles[i].p2 = rotateAroundX(triangles[i].p2, c, angle);
+        triangles[i].p3 = rotateAroundX(triangles[i].p3, c, angle);
+    }
+}
 
+/**
+ * @brief Rotates the pyramid around the Y axis.
+ * @param angle Rotation angle in degrees.
+ * @param c Center of rotation.
+ */
+__host__ __device__ void Pyramid::rotateY(double angle, const Point3D &c)
+{
+    for (int i = 0; i < 4; ++i)
+    {
+        triangles[i].p1 = rotateAroundY(triangles[i].p1, c, angle);
+        triangles[i].p2 = rotateAroundY(triangles[i].p2, c, angle);
+        triangles[i].p3 = rotateAroundY(triangles[i].p3, c, angle);
+    }
+}
+
+/**
+ * @brief Gets the center of the pyramid.
+ * @return The center point of the pyramid.
+ */
+__host__ __device__ Point3D Pyramid::getCenter() const
+{
+    return center;
+}
+
+// ---- Sphere Generation ----
+
+/**
+ * @brief Constructor for the triangle-based sphere.
+ * @param _center Center of the sphere.
+ */
+__host__ TriangleSphere::TriangleSphere(const Point3D &_center) : count(0), center(center) {}
+
+/**
+ * @brief Generate the sphere.
+ * @param center Center of the sphere.
+ * @param radius Radius of the sphere.
+ * @param latSteps Lateral step of triangles.
+ * @param longSteps Longitude step of triangles..
+ * @param mat Material of the sphere.
+ */
 __host__ void TriangleSphere::generate(const Point3D &center, double radius, int latSteps, int longSteps, const Material &mat)
 {
     count = 0;
@@ -285,6 +396,45 @@ __host__ void TriangleSphere::generate(const Point3D &center, double radius, int
             }
         }
     }
+}
+
+/**
+ * @brief Rotates the sphere around the X axis.
+ * @param angle Rotation angle in degrees.
+ * @param c Center of rotation.
+ */
+__host__ __device__ void TriangleSphere::rotateX(double angle, const Point3D &c)
+{
+    for (int i = 0; i < MAX_SPHERE_TRIANGLES; ++i)
+    {
+        triangles[i].p1 = rotateAroundX(triangles[i].p1, c, angle);
+        triangles[i].p2 = rotateAroundX(triangles[i].p2, c, angle);
+        triangles[i].p3 = rotateAroundX(triangles[i].p3, c, angle);
+    }
+}
+
+/**
+ * @brief Rotates the sphere around the Y axis.
+ * @param angle Rotation angle in degrees.
+ * @param c Center of rotation.
+ */
+__host__ __device__ void TriangleSphere::rotateY(double angle, const Point3D &c)
+{
+    for (int i = 0; i < MAX_SPHERE_TRIANGLES; ++i)
+    {
+        triangles[i].p1 = rotateAroundY(triangles[i].p1, c, angle);
+        triangles[i].p2 = rotateAroundY(triangles[i].p2, c, angle);
+        triangles[i].p3 = rotateAroundY(triangles[i].p3, c, angle);
+    }
+}
+
+/**
+ * @brief Gets the center of the sphere.
+ * @return The center point of the sphere.
+ */
+__host__ __device__ Point3D TriangleSphere::getCenter() const
+{
+    return center;
 }
 
 // ---- Other functions ----

@@ -10,6 +10,8 @@
  * @param _fov field of view of the camera
  * @param _width wifth of the camera
  * @param _height height of the camera
+ * @param _right right direction vector
+ * @param _up up direction vector
  */
 __host__ __device__ Camera::Camera(Point3D _position, Vecteur3D _direction, double _fov, int _width, int _height, Vecteur3D _right, Vecteur3D _up)
     : position(_position), direction(_direction.normalized()), fov(_fov), width(_width), height(_height), right(_right), up(_up)

@@ -86,11 +86,17 @@ struct Pyramid
 {
   // Attributes
   Triangle triangles[4];
+  Point3D center;
 
   // Constructor
   __host__ __device__ Pyramid(const Point3D &base1, const Point3D &base2,
                               const Point3D &base3, const Point3D &apex,
-                              const Material &mat);
+                              const Material &mat, const Point3D &_center);
+
+  // Methods
+  __host__ __device__ void rotateX(double angle, const Point3D &c);
+  __host__ __device__ void rotateY(double angle, const Point3D &c);
+  __host__ __device__ Point3D getCenter() const;
 };
 
 // Sphere struct
@@ -99,13 +105,17 @@ struct TriangleSphere
   // Attributes
   Triangle triangles[MAX_SPHERE_TRIANGLES];
   int count;
+  Point3D center;
 
   // Constructors
-  __host__ TriangleSphere();
+  __host__ TriangleSphere(const Point3D &_center);
 
   // Methods
   __host__ void generate(const Point3D &center, double radius, int latSteps,
                          int longSteps, const Material &mat);
+  __host__ __device__ void rotateX(double angle, const Point3D &c);
+  __host__ __device__ void rotateY(double angle, const Point3D &c);
+  __host__ __device__ Point3D getCenter() const;
 };
 
 // Helpers

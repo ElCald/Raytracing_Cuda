@@ -114,7 +114,8 @@ Vecteur3D phongShading(const Point3D &point, const Vecteur3D &normal, const Vect
         double distance2 = rawLightDir.dot(rawLightDir);
         Vecteur3D lightDir = rawLightDir / std::sqrt(distance2); // Normalize
 
-        double attenuation = 1.0 / distance2;
+        double d = sqrt(distance2);
+        double attenuation = 1.0 / (1.0 + 0.1 * d + 0.01 * d * d);
         Vecteur3D lightIntensity = light->intensity * attenuation;
 
         // Ambient
