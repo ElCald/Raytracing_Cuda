@@ -32,7 +32,7 @@ Dans `bash/`, en fonction de ce que vous souhaitez exécuter, faites :
 cd bash/
 sh main.sh a b c
 ```
-Pour exécuter le main, où a représente le nombre de secondes de la simulation, b le nombre de fps souhaités et c le nombre de tours effectués par les objets de la scène.
+Pour exécuter le main, où `a` représente le nombre de secondes de la simulation, `b` le nombre de fps souhaités et `c` le nombre de tours effectués par les objets de la scène.
 
 
 ```bash
